@@ -9,9 +9,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.LinkedList;
 
 /**
@@ -27,6 +25,7 @@ public class BoardGame extends JApplet implements ListSelectionListener {
     JComboBox cboAvailableMoves;
     int currentDetectiveIndex = 0;
     Controller controller;
+    boolean canMove = true;
 
     void buildUI(JFrame f) {
         parentFrame = f;
@@ -42,8 +41,8 @@ public class BoardGame extends JApplet implements ListSelectionListener {
         mapConstraints.gridx = 0;
         mapConstraints.gridy = 0;
         mapConstraints.gridwidth = 7;
-        mapConstraints.ipady = 1000; // Display long map
-        mapConstraints.ipady = 600; // Display wide map
+        mapConstraints.ipady = 1018; // Display long map
+        mapConstraints.ipady = 809; // Display wide map
         mapConstraints.weightx = 1.0; // should occupy all available horizontal space on
         // resizing
         mapConstraints.weighty = 1.0; // should occupy all available vertical space on
@@ -76,7 +75,7 @@ public class BoardGame extends JApplet implements ListSelectionListener {
             }
         });
         mx.setVisible(true);
-        mx.setEnabled(gameStarted);
+        //mx.setEnabled(gameStarted);
         GridBagConstraints mxC = new GridBagConstraints();
         mxC.gridx = 1;
         mxC.gridy = 1;
@@ -207,20 +206,84 @@ public class BoardGame extends JApplet implements ListSelectionListener {
     }
 
     private void startGame() {
-        //TODO do something
+        gameStarted = true;
+        controller = new Controller();
+        for (int i = 1; i <= Controller.getNumberOfDetectives(); i++) {
+            map.setPlayerPos(i, controller.getPoint(controller.getDetectives()[i - 1].getPosition().getPosition()));
+        }
+        map.setCurrentPlayer(1);
+        parentFrame.setVisible(true);
+        fullyAutomaticMode();
+    }
+
+    /**
+     * Tout les joueurs sont des ordinateurs
+     **/
+    private void fullyAutomaticMode() {
+        int round = 0;
+        while (gameStarted) {
+            System.out.println("Round: " + round);
+            moveMrX();
+            for (int i = 0; i < Controller.getNumberOfDetectives(); i++) {
+                moveDetective(i);
+            }
+            round++;
+        }
+    }
+
+    private void gameDone(boolean seekerAsWin) {
+        gameStarted = false;
+        System.out.println((seekerAsWin ? "Les detectives ont" : "Monsieurs X a") + " gagner");
+    }
+
+    private void moveMrX() {
+        if (controller.isSeekerAsWin())
+            gameDone(true);
+        Move move = controller.moveHider();
+        System.out.println("Mr X move to " + move.getNode());
+        map.mrXVisible = controller.isNeedToBeReveal();
+        map.setPlayerPos(0, controller.getPoint(move.getNode()).getLocation());
+
+        if (controller.isHiderAsWin())
+            gameDone(false);
+    }
+
+    private void moveDetective(int detectiveId) {
+        Move move = controller.moveDetectives(detectiveId);
+
+        if(move == null){
+            return;
+        }
+
+        System.out.println("Detective# " + detectiveId + " move to " + move.getNode());
+        if (canMove) {
+            controller.changeDetectivePosition(detectiveId, move);
+        }
+
+        int nodePos = controller.getDetectives()[detectiveId].getPosition().getPosition();
+        Point currentDetectivePos = controller.getPoint(nodePos);
+        map.setPlayerPos(detectiveId, currentDetectivePos.x, currentDetectivePos.y);
+
+        parentFrame.setVisible(true);
+        //currentDetectiveIndex = (detectiveId + 1) % NO_OF_DETECTIVES;
+        map.setCurrentPlayer((detectiveId + 1) % Controller.getNumberOfDetectives());
+        if (controller.isSeekerAsWin())
+            gameDone(true);
     }
 
     public static void main(String args[]) {
         JFrame f = new JFrame("Scotland yard");
         BoardGame game = new BoardGame();
         game.buildUI(f);
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 System.exit(0);
             }
         });
+        f.setSize(new Dimension(1057, 942));
 
-        f.setSize(new Dimension(1024, 700));
+        f.setLocation(dim.width / 2 - f.getSize().width / 2, dim.height / 2 - f.getSize().height / 2);
         f.setVisible(true);
         f.setResizable(true);
     }

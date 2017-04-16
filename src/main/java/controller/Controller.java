@@ -1,6 +1,7 @@
 package main.java.controller;
 
 import main.java.model.Link;
+import main.java.model.Move;
 import main.java.model.Node;
 import main.java.model.Transport;
 import main.java.model.player.Hider;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 /**
  * Created by j-c9 on 2017-04-15.
@@ -20,14 +22,14 @@ public class Controller {
     static private final int NO_OF_MOVES = 23;
     static private final int NO_OF_DETECTIVES = 5;
     static private final int CHECK_POINTS = 5;
-    static private final int INF = 100;
-    static private final int WIN = 200;
-    static private final int LOSE = -200;
-    static private final int NBEST = 1000000000;
+    static public final int INF = 100;
+    static public final int WIN = 200;
+    static public final int LOSE = -200;
+    static public final int NBEST = 1000000000;
     static private final int BLACK_TICKETS = 5;
 
-    static private int DEPTH = 2;
-    static private int[][] shortestDistance;
+    static public int DEPTH = 2;
+    static public int[][] shortestDistance;
     static private Node[] nodes;
     static private Point[] nodePositions;
     static private int[] checkPoints;
@@ -69,6 +71,16 @@ public class Controller {
             for (int j = 0; j < nodes.length; j++)
                 shortestDistance[i][j] = weight(nodes[i], nodes[j]);
         shortestDistance = getShortestDistanceMatrix(shortestDistance, 1);
+    }
+
+    public Controller(Controller board) {
+        this.currentMoves = board.currentMoves;
+        detectives = new Seeker[board.detectives.length];
+        for (int i = 0; i < detectives.length; i++) {
+            detectives[i] = new Seeker(board.detectives[i]);
+        }
+        Node n = board.MrX.getPosition();
+        MrX = new Hider(n);
     }
 
     /**
@@ -144,18 +156,32 @@ public class Controller {
         return detectives;
     }
 
-    public Hider getMrX(){
+    public Hider getMrX() {
         return MrX;
     }
 
-    public boolean isCheckPoint(int move) {
+    public boolean isNeedToBeReveal(){
+        return isNeedToBeReveal(currentMoves);
+    }
+
+    public boolean isNeedToBeReveal(int move) {
         for (int checkPoint : checkPoints) {
-            if(move == checkPoint){
+            if (move == checkPoint) {
                 return true;
             }
         }
         return false;
     }
+
+    public Move moveDetectives(int detectiveId){
+        TreeSet<Move> moves = getDetectivePossibleMoves(detectiveId);
+        return moves == null ? null : moves.first();
+    }
+
+    public TreeSet<Move> getDetectivePossibleMoves(int i) {
+        return detectives[i].getPossibleMoves(this);
+    }
+
 
     public int getCurrentMoves() {
         return currentMoves;
@@ -195,5 +221,50 @@ public class Controller {
 
     public Point getPoint(int nodeIndex) {
         return nodePositions[nodeIndex];
+    }
+
+    public boolean isHiderAsWin() {
+        boolean noneCanMove = true;
+        for (int i = 0; i < NO_OF_DETECTIVES; i++)
+            if (detectives[i].canMove(this))
+                noneCanMove = false;
+        return ((currentMoves == NO_OF_MOVES) || noneCanMove);
+    }
+
+    public boolean isSeekerAsWin() {
+        Link[] xLinks = MrX.getPosition().getLinks();
+        boolean isBlocked = true;
+        for (int i = 0; i < xLinks.length; i++) {
+            Node xNode = xLinks[i].getToNode();
+            boolean thisIsOccupied = false;
+            for (int j = 0; j < NO_OF_DETECTIVES; j++) {
+                Node dNode = detectives[j].getPosition();
+                if (dNode.equals(xNode))
+                    thisIsOccupied = true;
+            }
+            if (!thisIsOccupied)
+                isBlocked = false;
+        }
+        boolean isCaptured = false;
+        for (int i = 0; i < NO_OF_DETECTIVES; i++) {
+            Node detNode = detectives[i].getPosition();
+            if (detNode.equals(MrX.getPosition()))
+                isCaptured = true;
+        }
+        return (isBlocked || isCaptured);
+    }
+
+    public Move moveHider() {
+        Move move = getMrX().getNextMove(this);
+        currentMoves++;
+        return move;
+    }
+
+    public void changeDetectivePosition(int detectiveId, Move move) {
+        detectives[detectiveId].changePosition(nodes[move.getNode()], move.getType());
+    }
+
+    public static Node[] getNodes() {
+        return nodes;
     }
 }

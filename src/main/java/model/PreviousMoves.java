@@ -36,7 +36,7 @@ public class PreviousMoves extends AbstractTableModel {
         } else {
             // information of Mr. X
             Hider fg = controller.getMrX();
-            if (!controller.isCheckPoint(r + 1) && !revealAll)
+            if (!controller.isNeedToBeReveal(r + 1) && !revealAll)
                 pos += "" + fg.getPrevPos().get(r + 1).toString();
             else
                 pos += fg.getPrevPos().get(r + 1).toString();

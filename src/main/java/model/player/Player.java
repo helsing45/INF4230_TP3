@@ -10,6 +10,8 @@ public abstract class Player {
     protected Node position;
     protected LinkedList<Move> prevPositions;
 
+    protected Player(){}
+
     public Player(Node position) {
         this.position = position;
         prevPositions = new LinkedList<>();

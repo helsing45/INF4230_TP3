@@ -20,7 +20,7 @@ public class MapLabel extends JLabel implements ActionListener {
 
     private int currentPlayer = -1;
     boolean blinkOn = false;
-    boolean mrXVisible = false; /* Is Mr. X' Position revealed? */
+    public boolean mrXVisible = false; /* Is Mr. X' Position revealed? */
 
     Timer blinkTimer = new Timer(1000, this);
 

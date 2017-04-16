@@ -2,9 +2,9 @@ package main.java.model;
 
 public enum Transport {
 	NONE(0,"None",""),
-	TAXI(1,"TaxiTicket","T"),
-	BUS(2,"BusTicket","B"),
-	UG(3,"UndergroundTicket","U"),
+	TAXI(1,"Taxi","T"),
+	BUS(2,"Bus","B"),
+	UG(3,"Underground","U"),
 	FERRY(50,"Black","F"),
 	BLACK(60,"black","");
 
