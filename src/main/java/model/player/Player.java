@@ -15,7 +15,7 @@ public abstract class Player {
     public Player(Node position) {
         this.position = position;
         prevPositions = new LinkedList<>();
-        prevPositions.add(new Move(position.getPosition(), Transport.NONE));
+        prevPositions.add(new Move(position.getId(), Transport.NONE));
     }
 
     public Node getPosition() {

@@ -6,34 +6,34 @@ import main.java.model.Node;
 import main.java.model.Transport;
 import main.java.model.player.Hider;
 import main.java.model.player.Seeker;
+import main.java.utils.BoardParser;
+import main.java.utils.DistancesFileParser;
 
-import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.StringTokenizer;
+import java.util.List;
 import java.util.TreeSet;
 
-/**
- * Created by j-c9 on 2017-04-15.
- */
 public class Controller {
-    static private final int NO_OF_MOVES = 23;
-    static private final int NO_OF_DETECTIVES = 5;
-    static private final int CHECK_POINTS = 5;
-    static public final int INF = 100;
-    static public final int WIN = 200;
-    static public final int LOSE = -200;
-    static public final int NBEST = 1000000000;
-    static private final int BLACK_TICKETS = 5;
 
-    static public int DEPTH = 2;
-    static public int[][] shortestDistance;
-    static private Node[] nodes;
-    static private Point[] nodePositions;
-    static private int[] checkPoints;
-    static private int noOfNodes;
+    private static final String HIDERS_DISTANCES_FILE_NAME = "src/res/hiders_distances_file.xml";
+    private static final String SEEKERS_DISTANCES_FILE_NAME = "src/res/seekers_distances_file.xml";
+    private static final int NO_OF_MOVES = 23;
+    private static final int NO_OF_DETECTIVES = 5;
+    private static final int CHECK_POINTS = 5;
+    public static final int INF = 100;
+    public static final int WIN = 200;
+    public static final int LOSE = -200;
+    public static final int NBEST = 1000000000;
+    private static final int BLACK_TICKETS = 5;
+
+    public static int DEPTH = 2;
+    public static int[][] shortestDistance;
+    private static Node[] nodes;
+
+    private final List<List<Integer>> hidersDistances;
+    private final List<List<Integer>> seekersDistances;
+    private static int[] checkPoints;
+    private static int noOfNodes;
 
     private int currentMoves;
     private Seeker[] detectives;
@@ -44,8 +44,12 @@ public class Controller {
         checkPoints = new int[CHECK_POINTS];
         for (int i = 0; i < CHECK_POINTS; i++)
             checkPoints[i] = 3 + 5 * i;
-        readFile();
-        readPosFile();
+        nodes = BoardParser.getNodes();
+        DistancesFileParser distancesFileParser = new DistancesFileParser(HIDERS_DISTANCES_FILE_NAME);
+        hidersDistances = distancesFileParser.getParsedData();
+        distancesFileParser = new DistancesFileParser(SEEKERS_DISTANCES_FILE_NAME);
+        seekersDistances = distancesFileParser.getParsedData();
+
         detectives = new Seeker[NO_OF_DETECTIVES];
         int partition = nodes.length / NO_OF_DETECTIVES - 1;
         int part = 1;
@@ -60,7 +64,7 @@ public class Controller {
         do {
             xPos = 1 + (int) (noOfNodes * Math.random());
             for (int i = 0; i < NO_OF_DETECTIVES; i++)
-                if (xPos == detectives[i].getPosition().getPosition())
+                if (xPos == detectives[i].getPosition().getId())
                     done = false;
 
         } while (!done);
@@ -71,81 +75,6 @@ public class Controller {
             for (int j = 0; j < nodes.length; j++)
                 shortestDistance[i][j] = weight(nodes[i], nodes[j]);
         shortestDistance = getShortestDistanceMatrix(shortestDistance, 1);
-    }
-
-    public Controller(Controller board) {
-        this.currentMoves = board.currentMoves;
-        detectives = new Seeker[board.detectives.length];
-        for (int i = 0; i < detectives.length; i++) {
-            detectives[i] = new Seeker(board.detectives[i]);
-        }
-        Node n = board.MrX.getPosition();
-        MrX = new Hider(n);
-    }
-
-    /**
-     * This method reads the text file which contains the map
-     */
-    private void readFile() {
-        String fileName = "/res/SCOTMAP.TXT";
-        try {
-            File f = new File(getClass().getResource(fileName).getPath());
-            if (!f.exists())
-                throw new IOException();
-            RandomAccessFile map = new RandomAccessFile(f, "r");
-            String buffer = map.readLine();
-            StringTokenizer token;
-            token = new StringTokenizer(buffer);
-            noOfNodes = Integer.parseInt(token.nextToken());
-            nodes = new Node[noOfNodes];
-            for (int i = 0; i < nodes.length; i++)
-                nodes[i] = new Node(i);
-            int lks = Integer.parseInt(token.nextToken());
-            for (int i = 0; i < lks; i++) {
-                buffer = map.readLine();
-                token = new StringTokenizer(buffer);
-                int node1 = Integer.parseInt(token.nextToken());
-                int node2 = Integer.parseInt(token.nextToken());
-
-                Transport type = Transport.findByAbbreviation(token.nextToken());
-                nodes[node1].addLink(nodes[node2], type);
-                nodes[node2].addLink(nodes[node1], type);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, String.format("Error opening file %s. Exiting!", fileName), "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
-    }
-
-    /**
-     * This method reads the text file which contains the positions of the nodes
-     * on the map
-     */
-    private void readPosFile() {
-        String fileName = "/res/SCOTPOS.TXT";
-        try {
-            File f = new File(getClass().getResource(fileName).getPath());
-            if (!f.exists())
-                throw new IOException();
-            RandomAccessFile map = new RandomAccessFile(f, "r");
-            String buffer = map.readLine();
-            StringTokenizer token = new StringTokenizer(buffer);
-            noOfNodes = Integer.parseInt(token.nextToken());
-            nodePositions = new Point[noOfNodes];
-
-            for (int i = 0; i < noOfNodes; i++) {
-                buffer = map.readLine();
-                token = new StringTokenizer(buffer);
-                int node = Integer.parseInt(token.nextToken());
-                int x = Integer.parseInt(token.nextToken());
-                int y = Integer.parseInt(token.nextToken());
-
-                nodePositions[node] = new Point(x, y);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, String.format("Error opening file %s. Exiting!", fileName), "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
     }
 
     public static int getNumberOfDetectives() {
@@ -160,7 +89,7 @@ public class Controller {
         return MrX;
     }
 
-    public boolean isNeedToBeReveal(){
+    public boolean isNeedToBeReveal() {
         return isNeedToBeReveal(currentMoves);
     }
 
@@ -173,7 +102,7 @@ public class Controller {
         return false;
     }
 
-    public Move moveDetectives(int detectiveId){
+    public Move moveDetectives(int detectiveId) {
         TreeSet<Move> moves = getDetectivePossibleMoves(detectiveId);
         return moves == null ? null : moves.first();
     }
@@ -220,7 +149,7 @@ public class Controller {
     }
 
     public Point getPoint(int nodeIndex) {
-        return nodePositions[nodeIndex];
+        return nodes[nodeIndex].getBoardPosition();
     }
 
     public boolean isHiderAsWin() {

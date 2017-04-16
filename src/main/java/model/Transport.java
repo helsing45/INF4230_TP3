@@ -2,10 +2,10 @@ package main.java.model;
 
 public enum Transport {
 	NONE(0,"None",""),
-	TAXI(1,"Taxi","T"),
-	BUS(2,"Bus","B"),
-	UG(3,"Underground","U"),
-	FERRY(50,"Black","F"),
+	TAXI(1,"Taxi","taxi"),
+	BUS(2,"Bus","bus"),
+	UG(3,"Underground","underground"),
+	FERRY(50,"Black","boat"),
 	BLACK(60,"black","");
 
 	private int id;

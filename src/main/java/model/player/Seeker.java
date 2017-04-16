@@ -77,7 +77,7 @@ public class Seeker extends Player {
             //cannot use ferry, so ignore if the link is of type ferry
             if (link.getType() == Transport.FERRY) continue;
             if(canUse(board,link)){
-                possibleMoves.add(new Move(link.getToNode().getPosition(), link.getType()));
+                possibleMoves.add(new Move(link.getToNode().getId(), link.getType()));
             }
         }
         return possibleMoves;
@@ -91,7 +91,7 @@ public class Seeker extends Player {
     }
 
     public void changePosition(Node n, Transport ticket){
-        prevPositions.add(new Move(n.getPosition(), ticket));
+        prevPositions.add(new Move(n.getId(), ticket));
         change(n,ticket);
     }
 }

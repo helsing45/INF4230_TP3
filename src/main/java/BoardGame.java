@@ -209,7 +209,7 @@ public class BoardGame extends JApplet implements ListSelectionListener {
         gameStarted = true;
         controller = new Controller();
         for (int i = 1; i <= Controller.getNumberOfDetectives(); i++) {
-            map.setPlayerPos(i, controller.getPoint(controller.getDetectives()[i - 1].getPosition().getPosition()));
+            map.setPlayerPos(i, controller.getPoint(controller.getDetectives()[i - 1].getPosition().getId()));
         }
         map.setCurrentPlayer(1);
         parentFrame.setVisible(true);
@@ -260,7 +260,7 @@ public class BoardGame extends JApplet implements ListSelectionListener {
             controller.changeDetectivePosition(detectiveId, move);
         }
 
-        int nodePos = controller.getDetectives()[detectiveId].getPosition().getPosition();
+        int nodePos = controller.getDetectives()[detectiveId].getPosition().getId();
         Point currentDetectivePos = controller.getPoint(nodePos);
         map.setPlayerPos(detectiveId, currentDetectivePos.x, currentDetectivePos.y);
 

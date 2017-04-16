@@ -1,7 +1,10 @@
 package main.java.model;
 
+import java.awt.*;
+
 public class Node {
 	private int position;
+	private Point boardPosition;
 	private Link[] links;
 
 	public Node(int pos) {
@@ -24,8 +27,20 @@ public class Node {
 		}
 	}
 
-	public int getPosition() {
+	public int getId() {
 		return position;
+	}
+
+	public Point getBoardPosition() {
+		return boardPosition;
+	}
+
+	public void setBoardPosition(Point boardPosition) {
+		this.boardPosition = boardPosition;
+	}
+
+	public void setBoardPosition(String x, String y){
+		this.boardPosition = new Point(Integer.valueOf(x),Integer.valueOf(y));
 	}
 
 	public Link[] getLinks() {
