@@ -10,11 +10,15 @@ import main.java.utils.BoardParser;
 import main.java.utils.DistancesFileParser;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeSet;
 
 public class Controller {
 
+    private static final int[] STARTING_LOCATION_SEEKER = new int[]{13, 26, 29, 34, 50, 53, 91, 94, 103, 112, 117, 123, 138, 141, 155, 174};
+    private static final int[] STARTING_LOCATION_HIDER = new int[]{35, 45, 51, 71, 78, 104, 106, 127, 132, 146, 166, 170, 172};
     private static final String HIDERS_DISTANCES_FILE_NAME = "src/res/hiders_distances_file.xml";
     private static final String SEEKERS_DISTANCES_FILE_NAME = "src/res/seekers_distances_file.xml";
     private static final int NO_OF_MOVES = 23;
@@ -42,39 +46,49 @@ public class Controller {
     public Controller() {
         currentMoves = 0;
         checkPoints = new int[CHECK_POINTS];
-        for (int i = 0; i < CHECK_POINTS; i++)
+        for (int i = 0; i < CHECK_POINTS; i++) {
             checkPoints[i] = 3 + 5 * i;
+        }
         nodes = BoardParser.getNodes();
         DistancesFileParser distancesFileParser = new DistancesFileParser(HIDERS_DISTANCES_FILE_NAME);
         hidersDistances = distancesFileParser.getParsedData();
         distancesFileParser = new DistancesFileParser(SEEKERS_DISTANCES_FILE_NAME);
         seekersDistances = distancesFileParser.getParsedData();
+        initPlayerPosition();
 
-        detectives = new Seeker[NO_OF_DETECTIVES];
-        int partition = nodes.length / NO_OF_DETECTIVES - 1;
-        int part = 1;
-        for (int i = 0; i < NO_OF_DETECTIVES; i++) {
-            int rnd = (int) (partition * Math.random());
-            int pos = rnd + part;
-            detectives[i] = new Seeker(nodes[pos]);
-            part += partition;
-        }
-        int xPos = 0;
-        boolean done = true;
-        do {
-            xPos = 1 + (int) (noOfNodes * Math.random());
-            for (int i = 0; i < NO_OF_DETECTIVES; i++)
-                if (xPos == detectives[i].getPosition().getId())
-                    done = false;
-
-        } while (!done);
-        MrX = new Hider(nodes[xPos]);
         MrX.setBlackTickets(BLACK_TICKETS);
         shortestDistance = new int[nodes.length][nodes.length];
         for (int i = 0; i < nodes.length; i++)
             for (int j = 0; j < nodes.length; j++)
                 shortestDistance[i][j] = weight(nodes[i], nodes[j]);
         shortestDistance = getShortestDistanceMatrix(shortestDistance, 1);
+    }
+
+    public void initPlayerPosition() {
+        detectives = new Seeker[NO_OF_DETECTIVES];
+        ArrayList<Integer> startingPosition = new ArrayList<>();
+        int tempPosition;
+
+        while (startingPosition.size() < NO_OF_DETECTIVES){
+            tempPosition = STARTING_LOCATION_SEEKER[new Random().nextInt(STARTING_LOCATION_SEEKER.length - 1)];
+            if(!startingPosition.contains(tempPosition)){
+                startingPosition.add(tempPosition);
+            }
+        }
+
+        for (int index = 0; index < startingPosition.size(); index++) {
+            detectives[index] = new Seeker(nodes[startingPosition.get(index)]);
+        }
+
+        startingPosition.add(tempPosition = STARTING_LOCATION_HIDER[new Random().nextInt(STARTING_LOCATION_HIDER.length - 1)]);
+        MrX = new Hider(nodes[tempPosition]);
+
+        //Pour le debuggage
+        System.out.print("Starting position ");
+        for (Integer integer : startingPosition) {
+            System.out.print(integer + ", ");
+        }
+        System.out.println();
     }
 
     public static int getNumberOfDetectives() {
@@ -105,6 +119,7 @@ public class Controller {
     public Move moveDetectives(int detectiveId) {
         TreeSet<Move> moves = getDetectivePossibleMoves(detectiveId);
         return moves == null ? null : moves.first();
+        //TODO do the magic
     }
 
     public TreeSet<Move> getDetectivePossibleMoves(int i) {
@@ -190,7 +205,7 @@ public class Controller {
     }
 
     public void changeDetectivePosition(int detectiveId, Move move) {
-        detectives[detectiveId].changePosition(nodes[move.getNode()], move.getType());
+        detectives[detectiveId].changePosition(nodes[move.getNode() - 1], move.getType());
     }
 
     public static Node[] getNodes() {

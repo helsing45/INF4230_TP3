@@ -53,5 +53,6 @@ public class Hider extends Player implements IA {
         Link link = getPosition().getLinks()[0];
         changePosition(link.getToNode());
         return new Move(link.getToNode().getId(),link.getType());
+        //TODO do the magic
     }
 }

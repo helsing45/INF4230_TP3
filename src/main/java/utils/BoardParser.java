@@ -27,7 +27,7 @@ public class BoardParser {
 
             nodes = new Node[nList.getLength()];
             for (int i = 0; i < nList.getLength(); i++)
-                nodes[i] = new Node(i);
+                nodes[i] = new Node(i + 1);
 
             for (int i = 0; i < nList.getLength(); i++) {
                 if (nList.item(i).getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
@@ -40,13 +40,12 @@ public class BoardParser {
 
                     for (int j = 0; j < links.getLength(); j++) {
                         final Element link = (Element) links.item(j);
-                        int destination = Integer.valueOf(link.getElementsByTagName("destination").item(0).getTextContent()) - 1;
+                        int destination = Integer.valueOf(link.getElementsByTagName("destination").item(0).getTextContent());
                         Transport type = Transport.findByAbbreviation(link.getElementsByTagName("transportation").item(0).getTextContent());
-                        nodes[i].addLink(nodes[destination], type);
-                        nodes[destination].addLink(nodes[i], type);
+                        nodes[i].addLink(nodes[destination - 1], type);
+                        //nodes[destination - 1].addLink(nodes[i], type);
+                        boolean b = true;
                     }
-
-
                 }
             }
 
