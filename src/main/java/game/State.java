@@ -11,7 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class State implements MctsDomainState<Action, Player> {
+public class State implements MctsDomainState<Action, Player> , Cloneable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
     private static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
@@ -278,5 +278,19 @@ public class State implements MctsDomainState<Action, Player> {
 
     public void updateHidersProbablePosition() {
         playersOnBoard.fixHidersProbablePosition();
+    }
+
+    @Override
+    public State clone() throws CloneNotSupportedException {
+        State clone = new State(playersOnBoard,numberOfPlayers);
+        clone.currentRound = currentRound;
+        clone.currentPlayerIndex = currentPlayerIndex;
+        clone.previousPlayerIndex = previousPlayerIndex;
+        clone.lastHidersTransportation = lastHidersTransportation;
+        clone.inSearch = inSearch;
+        clone.searchInvokingPlayerIsHider = searchInvokingPlayerIsHider;
+        clone.searchInvokingPlayerUsesCoalitionReduction = searchInvokingPlayerUsesCoalitionReduction;
+        clone.searchInvokingPlayerUsesMoveFiltering = searchInvokingPlayerUsesMoveFiltering;
+        return clone;
     }
 }

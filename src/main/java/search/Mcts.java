@@ -1,6 +1,5 @@
 package main.java.search;
 
-import main.java.cloning.Cloner;
 import main.java.game.Action;
 import main.java.game.State;
 import main.java.players.Player;
@@ -14,25 +13,18 @@ public class Mcts {
 
     private final int numberOfIterations;
     private double explorationParameter;
-    private final Cloner cloner;
 
     public static Mcts initializeIterations(int numberOfIterations) {
-        Cloner cloner = new Cloner();
-        return new Mcts(numberOfIterations, cloner);
+        return new Mcts(numberOfIterations);
     }
 
-    private Mcts(int numberOfIterations, Cloner cloner) {
+    private Mcts(int numberOfIterations) {
         this.numberOfIterations = numberOfIterations;
-        this.cloner = cloner;
-    }
-
-    public void dontClone(final Class<?>... classes) {
-        cloner.dontClone(classes);
     }
 
     public Action uctSearchWithExploration(State state, double explorationParameter) {
         setExplorationForSearch(explorationParameter);
-        MctsTreeNode rootNode = new MctsTreeNode(state, cloner);
+        MctsTreeNode rootNode = new MctsTreeNode(state);
         for (int i = 0; i < numberOfIterations; i++) {
             performMctsIteration(rootNode, state.getCurrentAgent());
         }

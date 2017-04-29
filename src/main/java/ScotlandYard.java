@@ -1,7 +1,6 @@
 package main.java;
 
 import main.java.game.Action;
-import main.java.game.Board;
 import main.java.game.State;
 import main.java.players.Hider;
 import main.java.players.Player;
@@ -51,9 +50,7 @@ public class ScotlandYard {
     }
 
     private static Mcts initializeSearch() {
-        Mcts mcts = Mcts.initializeIterations(MCTS_ITERATIONS);
-        mcts.dontClone(Board.class);
-        return mcts;
+        return Mcts.initializeIterations(MCTS_ITERATIONS);
     }
 
     private static void setHumanPlayer(Scanner scanner) {

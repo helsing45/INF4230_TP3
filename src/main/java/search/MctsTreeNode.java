@@ -1,6 +1,5 @@
 package main.java.search;
 
-import main.java.cloning.Cloner;
 import main.java.game.Action;
 import main.java.game.State;
 import main.java.players.Player;
@@ -17,21 +16,18 @@ public class MctsTreeNode {
     private int visitCount;
     private double totalReward;
     private List<MctsTreeNode> childNodes;
-    private final Cloner cloner;
 
-    protected MctsTreeNode(State representedState, Cloner cloner) {
-        this(null, null, representedState, cloner);
+    protected MctsTreeNode(State representedState) {
+        this(null, null, representedState);
     }
 
-    private MctsTreeNode(MctsTreeNode parentNode, Action incomingAction,
-                         State representedState, Cloner cloner) {
+    private MctsTreeNode(MctsTreeNode parentNode, Action incomingAction, State representedState) {
         this.parentNode = parentNode;
         this.incomingAction = incomingAction;
         this.representedState = representedState;
         this.visitCount = 0;
         this.totalReward = 0.0;
         this.childNodes = new ArrayList<>();
-        this.cloner = cloner;
     }
 
     protected MctsTreeNode getParentNode() {
@@ -126,12 +122,17 @@ public class MctsTreeNode {
     }
 
     protected State getDeepCloneOfRepresentedState() {
-        return cloner.deepClone(representedState);
+        try {
+            return representedState.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private MctsTreeNode appendNewChildInstance(
             State representedState, Action incomingAction) {
-        MctsTreeNode childNode = new MctsTreeNode(this, incomingAction, representedState, cloner);
+        MctsTreeNode childNode = new MctsTreeNode(this, incomingAction, representedState);
         childNodes.add(childNode);
         return childNode;
     }
