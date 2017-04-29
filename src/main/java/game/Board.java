@@ -2,13 +2,16 @@ package main.java.game;
 
 import main.java.players.Player;
 import main.java.utilities.BoardFileParser;
+import main.java.utilities.BoardPositionFileParser;
 import main.java.utilities.DistancesFileParser;
 
+import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Board {
 
+    private static final String BOARD_NODE_LOCATION = "src/main/resources/board_position.xml";
     private static final String BOARD_FILE_NAME = "src/main/resources/board_file.xml";
     private static final String HIDERS_DISTANCES_FILE_NAME = "src/main/resources/hiders_distances_file.xml";
     private static final String SEEKERS_DISTANCES_FILE_NAME = "src/main/resources/seekers_distances_file.xml";
@@ -16,22 +19,29 @@ public class Board {
     private final List<List<Action>> positionsActions;
     private final List<List<Integer>> hidersDistances;
     private final List<List<Integer>> seekersDistances;
+    private final List<Point> locations;
 
     public static Board initialize() {
         BoardFileParser boardFileParser = new BoardFileParser(BOARD_FILE_NAME);
         List<List<Action>> positionsActions = boardFileParser.getParsedData();
+
+        BoardPositionFileParser boardLocationParser = new BoardPositionFileParser(BOARD_NODE_LOCATION);
+        List<Point> locations = boardLocationParser.getParsedData();
+
         DistancesFileParser distancesFileParser = new DistancesFileParser(HIDERS_DISTANCES_FILE_NAME);
         List<List<Integer>> hidersDistances = distancesFileParser.getParsedData();
+
         distancesFileParser = new DistancesFileParser(SEEKERS_DISTANCES_FILE_NAME);
         List<List<Integer>> seekersDistances = distancesFileParser.getParsedData();
-        return new Board(positionsActions, hidersDistances, seekersDistances);
+
+        return new Board(positionsActions,locations, hidersDistances, seekersDistances);
     }
 
-    private Board(List<List<Action>> positionsActions, List<List<Integer>> hidersDistances,
-                  List<List<Integer>> seekersDistances) {
+    private Board(List<List<Action>> positionsActions, List<Point> locations, List<List<Integer>> hidersDistances, List<List<Integer>> seekersDistances) {
         this.positionsActions = positionsActions;
         this.hidersDistances = hidersDistances;
         this.seekersDistances = seekersDistances;
+        this.locations = locations;
     }
 
     public List<Integer> getDestinationsForPosition(int position) {

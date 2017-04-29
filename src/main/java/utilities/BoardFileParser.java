@@ -61,12 +61,13 @@ public class BoardFileParser extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String elementName, Attributes attributes)
             throws SAXException {
-        if (elementName.equalsIgnoreCase("boardPosition"))
+        if (elementName.equalsIgnoreCase("boardPosition")) {
             temporaryPosition = new ArrayList<>();
-        else if (elementName.equalsIgnoreCase("transportation"))
+        }else if (elementName.equalsIgnoreCase("transportation")) {
             isTransportation = true;
-        else if (elementName.equalsIgnoreCase("destination"))
+        }else if (elementName.equalsIgnoreCase("destination")) {
             isDestination = true;
+        }
     }
 
     @Override
