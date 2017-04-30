@@ -23,6 +23,7 @@ public class MapLabel extends JLabel implements ActionListener {
     public boolean mrXVisible = false; /* Is Mr. X' Position revealed? */
 
     Timer blinkTimer = new Timer(1000, this);
+    private int[] playerPos;
 
     public MapLabel(ImageIcon imageIcon, int numDetectives) {
         super(imageIcon);
@@ -124,4 +125,7 @@ public class MapLabel extends JLabel implements ActionListener {
         }
     }
 
+    public void setPlayerPos(int[] playerPos) {
+        this.playerPos = playerPos;
+    }
 }

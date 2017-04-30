@@ -6,10 +6,11 @@ import main.java.utilities.BoardPositionFileParser;
 import main.java.utilities.DistancesFileParser;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Board {
+public class Board implements Serializable{
 
     private static final String BOARD_NODE_LOCATION = "src/main/resources/board_position.xml";
     private static final String BOARD_FILE_NAME = "src/main/resources/board_file.xml";
@@ -44,6 +45,10 @@ public class Board {
         this.locations = locations;
     }
 
+    public Point getPoint(int position){
+        return locations.get(position - 1);
+    }
+
     public List<Integer> getDestinationsForPosition(int position) {
         return getActionsForPosition(position).stream()
                 .map(Action::getDestination)
@@ -51,8 +56,7 @@ public class Board {
     }
 
     public List<Action> getActionsForPosition(int position) {
-        int positionListIndex = getListIndexFromPosition(position);
-        return positionsActions.get(positionListIndex);
+        return positionsActions.get(position - 1);
     }
 
     public List<Integer> getTransportationDestinationsForPosition (
@@ -63,14 +67,9 @@ public class Board {
     }
 
     public List<Action> getTransportationActionsForPosition(Action.Transportation transportation, int position) {
-        int positionListIndex = getListIndexFromPosition(position);
-        return positionsActions.get(positionListIndex).stream()
+        return positionsActions.get(position - 1).stream()
                 .filter(action -> action.getTransportation() == transportation)
                 .collect(Collectors.toList());
-    }
-
-    private int getListIndexFromPosition(int position) {
-        return position - 1;
     }
 
     public int shortestDistanceBetween(int position1, int position2, Player.Type type) {

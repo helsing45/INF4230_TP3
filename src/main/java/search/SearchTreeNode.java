@@ -1,6 +1,5 @@
 package main.java.search;
 
-import main.java.cloning.Cloner;
 import main.java.model.Action;
 import main.java.model.State;
 import main.java.players.Player;
@@ -9,32 +8,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MctsTreeNode {
+public class SearchTreeNode {
 
-    private final MctsTreeNode parentNode;
+    private final SearchTreeNode parentNode;
     private final Action incomingAction;
     private final State representedState;
     private int visitCount;
     private double totalReward;
-    private List<MctsTreeNode> childNodes;
-    private final Cloner cloner;
+    private List<SearchTreeNode> childNodes;
 
-    protected MctsTreeNode(State representedState, Cloner cloner) {
-        this(null, null, representedState, cloner);
+    protected SearchTreeNode(State representedState) {
+        this(null, null, representedState);
     }
 
-    private MctsTreeNode(MctsTreeNode parentNode, Action incomingAction,
-                         State representedState, Cloner cloner) {
+    private SearchTreeNode(SearchTreeNode parentNode, Action incomingAction, State representedState) {
         this.parentNode = parentNode;
         this.incomingAction = incomingAction;
         this.representedState = representedState;
         this.visitCount = 0;
         this.totalReward = 0.0;
         this.childNodes = new ArrayList<>();
-        this.cloner = cloner;
     }
 
-    protected MctsTreeNode getParentNode() {
+    protected SearchTreeNode getParentNode() {
         return parentNode;
     }
 
@@ -50,7 +46,7 @@ public class MctsTreeNode {
         return parentNode.getVisitCount();
     }
 
-    protected List<MctsTreeNode> getChildNodes() {
+    protected List<SearchTreeNode> getChildNodes() {
         return childNodes;
     }
 
@@ -74,22 +70,22 @@ public class MctsTreeNode {
         return representedState.getNumberOfAvailableActionsForCurrentAgent() == childNodes.size();
     }
 
-    protected boolean hasUnvisitedChild () {
+    protected boolean hasUnvisitedChild() {
         return childNodes.stream()
-                .anyMatch(MctsTreeNode::isUnvisited);
+                .anyMatch(SearchTreeNode::isUnvisited);
     }
 
     private boolean isUnvisited() {
         return visitCount == 0;
     }
 
-    protected MctsTreeNode addNewChildWithoutAction() {
-        State childNodeState = getDeepCloneOfRepresentedState();
+    protected SearchTreeNode addNewChildWithoutAction() {
+        State childNodeState = getCopyOfRepresentedState();
         childNodeState.skipCurrentAgent();
         return appendNewChildInstance(childNodeState, null);
     }
 
-    protected MctsTreeNode addNewChildFromAction(Action action) {
+    protected SearchTreeNode addNewChildFromAction(Action action) {
         if (!isUntriedAction(action))
             throw new IllegalArgumentException("Error: invalid action passed as function parameter");
         else
@@ -110,29 +106,27 @@ public class MctsTreeNode {
 
     private List<Action> getTriedActionsForCurrentAgent() {
         return childNodes.stream()
-                .map(MctsTreeNode::getIncomingAction)
+                .map(SearchTreeNode::getIncomingAction)
                 .collect(Collectors.toList());
     }
 
-    private MctsTreeNode addNewChildFromUntriedAction(Action incomingAction) {
+    private SearchTreeNode addNewChildFromUntriedAction(Action incomingAction) {
         State childNodeState = getNewStateFromAction(incomingAction);
         return appendNewChildInstance(childNodeState, incomingAction);
     }
 
     private State getNewStateFromAction(Action action) {
-        State representedStateClone = getDeepCloneOfRepresentedState();
+        State representedStateClone = getCopyOfRepresentedState();
         representedStateClone.performActionForCurrentAgent(action);
         return representedStateClone;
     }
 
-    protected State getDeepCloneOfRepresentedState() {
-        return cloner.deepClone(representedState);
+    protected State getCopyOfRepresentedState() {
+        return representedState.copy();
     }
 
-    private MctsTreeNode appendNewChildInstance(
-            State representedState, Action incomingAction) {
-        MctsTreeNode childNode = new MctsTreeNode(
-                this, incomingAction, representedState, cloner);
+    private SearchTreeNode appendNewChildInstance(State representedState, Action incomingAction) {
+        SearchTreeNode childNode = new SearchTreeNode(this, incomingAction, representedState);
         childNodes.add(childNode);
         return childNode;
     }

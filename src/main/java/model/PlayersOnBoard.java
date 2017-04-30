@@ -4,11 +4,14 @@ import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
 
+import java.awt.*;
+import java.io.Serializable;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PlayersOnBoard {
+public class PlayersOnBoard implements Serializable {
     public static final int NUMBER_OF_PLAYERS = 6;
     private static final int HIDERS_INDEX = 0;
     private static final int SKIP_HIDER = 1;
@@ -33,14 +36,8 @@ public class PlayersOnBoard {
         return new PlayersOnBoard(board, players, playersPositions, hidersPossibleLocations,
                 hidersMostProbablePosition);
     }
-
-    protected static PlayersOnBoard initializeTest(Player[] players, int[] playersPositions,
-                                                   int hidersMostProbablePosition) {
-        validatePlayers(players);
-        Board board = Board.initialize();
-        List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions);
-        return new PlayersOnBoard(board, players, playersPositions, hidersPossibleLocations,
-                hidersMostProbablePosition);
+    public Point getLocationOf(int playerId){
+        return board.getPoint(playersActualPositions[playerId]);
     }
 
     private static void validatePlayers(Player[] players) {
@@ -76,14 +73,15 @@ public class PlayersOnBoard {
                 .skip(SKIP_HIDER).boxed().collect(Collectors.toList());
     }
 
-    private PlayersOnBoard(Board board, Player[] players, int[] playersPositions,
-                           List<Integer> hidersPossiblePositions, int hidersMostProbablePosition) {
+    private PlayersOnBoard(Board board, Player[] players, int[] playersPositions,List<Integer> hidersPossiblePositions, int hidersMostProbablePosition) {
         this.board = board;
         this.players = players;
         this.playersActualPositions = playersPositions;
         this.hidersPossiblePositions = hidersPossiblePositions;
         this.hidersMostProbablePosition = hidersMostProbablePosition;
     }
+
+
 
     public double hidersAverageDistanceToSeekers(Player.Type type) {
         int hidersPosition = playersActualPositions[HIDERS_INDEX];
@@ -141,9 +139,12 @@ public class PlayersOnBoard {
     }
 
     protected boolean anySeekerOnPosition(int position) {
-        return Arrays.stream(playersActualPositions)
-                .skip(SKIP_HIDER)
-                .anyMatch(seekersPosition -> seekersPosition == position);
+        for (int index = 0; index < playersActualPositions.length; index++) {
+            if(index != HIDERS_INDEX && playersActualPositions[index] == position){
+                return true;
+            }
+        }
+        return false;
     }
 
     protected boolean seekerOnHidersMostProbablePosition(Seeker seeker) {

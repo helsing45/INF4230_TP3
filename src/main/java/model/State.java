@@ -3,15 +3,16 @@ package main.java.model;
 import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
-import main.java.search.MctsDomainState;
+import main.java.utilities.clone.DeepCopy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class State implements MctsDomainState<Action, Player> , Cloneable{
+public class State implements Serializable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
     public static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
@@ -53,12 +54,10 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
         return playersOnBoard;
     }
 
-    @Override
     public Player getCurrentAgent() {
         return playersOnBoard.getPlayerAtIndex(currentPlayerIndex);
     }
 
-    @Override
     public Player getPreviousAgent() {
         return playersOnBoard.getPlayerAtIndex(previousPlayerIndex);
     }
@@ -115,7 +114,6 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
         return HIDER_SURFACES_ROUNDS.contains(currentRound);
     }
 
-    @Override
     public boolean isTerminal() {
         return seekersWon() || hiderWon();
     }
@@ -138,8 +136,7 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
             return playersOnBoard.seekerOnHidersActualPosition(seeker);
     }
 
-    @Override
-    public MctsDomainState performActionForCurrentAgent(Action action) {
+    public State performActionForCurrentAgent(Action action) {
         validateIsAvailableAction(action);
         if (inSearchFromSeekersPov())
             playersOnBoard.movePlayerFromSeekersPov(currentPlayerIndex, action);
@@ -196,18 +193,15 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
         currentRound++;
     }
 
-    @Override
-    public MctsDomainState skipCurrentAgent() {
+    public State skipCurrentAgent() {
         prepareStateForNextPlayer();
         return this;
     }
 
-    @Override
     public int getNumberOfAvailableActionsForCurrentAgent() {
         return getAvailableActionsForCurrentAgent().size();
     }
 
-    @Override
     public List<Action> getAvailableActionsForCurrentAgent() {
         List<Action> availableActions;
         if (inSearchFromSeekersPov())
@@ -288,17 +282,7 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
         playersOnBoard.fixHidersProbablePosition();
     }
 
-    @Override
-    public State clone() throws CloneNotSupportedException {
-        State clone = new State(playersOnBoard,numberOfPlayers);
-        clone.currentRound = currentRound;
-        clone.currentPlayerIndex = currentPlayerIndex;
-        clone.previousPlayerIndex = previousPlayerIndex;
-        clone.lastHidersTransportation = lastHidersTransportation;
-        clone.inSearch = inSearch;
-        clone.searchInvokingPlayerIsHider = searchInvokingPlayerIsHider;
-        clone.searchInvokingPlayerUsesCoalitionReduction = searchInvokingPlayerUsesCoalitionReduction;
-        clone.searchInvokingPlayerUsesMoveFiltering = searchInvokingPlayerUsesMoveFiltering;
-        return clone;
+    public State copy(){
+        return DeepCopy.copy(this);
     }
 }

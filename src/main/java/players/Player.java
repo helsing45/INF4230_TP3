@@ -2,12 +2,13 @@ package main.java.players;
 
 import main.java.model.Action;
 import main.java.model.State;
-import main.java.search.MctsDomainAgent;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 
-public abstract class Player implements MctsDomainAgent<State> {
+import java.io.Serializable;
+
+public abstract class Player implements Serializable {
 
     public enum Operator {
         HUMAN, COMPUTER, RANDOM
@@ -105,7 +106,6 @@ public abstract class Player implements MctsDomainAgent<State> {
         }
     }
 
-    @Override
     public final State getTerminalStateByPerformingSimulationFromState(State state) {
         while (!state.isTerminal()) {
             Action action = getActionForCurrentPlayerType(state);
@@ -155,4 +155,6 @@ public abstract class Player implements MctsDomainAgent<State> {
     protected abstract Action getActionForHiderFromStatesAvailableActionsForSimulation(State state);
 
     protected abstract Action getActionForSeekerFromStatesAvailableActionsForSimulation(State state);
+
+    public abstract double getRewardFromTerminalState(State terminalState);
 }

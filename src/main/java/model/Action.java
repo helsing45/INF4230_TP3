@@ -1,6 +1,8 @@
 package main.java.model;
 
-public class Action {
+import java.io.Serializable;
+
+public class Action implements Serializable{
 
     public enum Transportation {
         TAXI, BUS, UNDERGROUND, BLACK_FARE

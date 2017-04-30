@@ -5,7 +5,7 @@ import main.java.model.State;
 import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
-import main.java.search.Mcts;
+import main.java.search.SearchTree;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
@@ -32,7 +32,7 @@ public class ScotlandYard {
     public static void main(String... args) {
         printWelcomeText();
         Scanner scanner = new Scanner(System.in);
-        Mcts mcts = initializeSearch();
+        SearchTree mcts = initializeSearch();
         setHumanPlayer(scanner);
         for (int i = 0; i < numberOfGames; i++)
             playOneGame(mcts, scanner);
@@ -49,8 +49,8 @@ public class ScotlandYard {
                 "Welcome to the Scotland Yard Board Game with Monte Carlo Tree Search AI players.\n");
     }
 
-    private static Mcts initializeSearch() {
-        return Mcts.initializeIterations(MCTS_ITERATIONS);
+    private static SearchTree initializeSearch() {
+        return SearchTree.initializeIterations(MCTS_ITERATIONS);
     }
 
     private static void setHumanPlayer(Scanner scanner) {
@@ -77,7 +77,7 @@ public class ScotlandYard {
         System.out.print("How many games should be played?\nEnter number of games:\n");
     }
 
-    private static void playOneGame(Mcts mcts, Scanner scanner) {
+    private static void playOneGame(SearchTree mcts, Scanner scanner) {
         Player[] players = initializePlayers(humanType);
         State state = State.initialize(players);
         while (!state.isTerminal()) {
@@ -104,7 +104,7 @@ public class ScotlandYard {
         return players;
     }
 
-    private static void performOneAction(State state, Mcts mcts, Scanner scanner) {
+    private static void performOneAction(State state, SearchTree mcts, Scanner scanner) {
         if (shouldPrintGameStateInfo())
             printBeforeMove(state);
         if (currentPlayerCanMove(state)) {
@@ -130,7 +130,7 @@ public class ScotlandYard {
         return state.getAvailableActionsForCurrentAgent().size() > 0;
     }
 
-    private static Action getNextAction(State state, Mcts mcts, Scanner scanner) {
+    private static Action getNextAction(State state, SearchTree mcts, Scanner scanner) {
         Action mostPromisingAction;
         if (state.currentPlayerIsHuman())
             mostPromisingAction = getActionFromInput(state, scanner);
@@ -157,7 +157,7 @@ public class ScotlandYard {
         System.out.println();
     }
 
-    private static Action getActionFromSearch(State state, Mcts mcts) {
+    private static Action getActionFromSearch(State state, SearchTree mcts) {
         if (state.currentPlayerIsRandom())
             return getRandomAction(state);
         else
@@ -170,7 +170,7 @@ public class ScotlandYard {
         return actions.get(0);
     }
 
-    private static Action getActionFromMctsSearch(State state, Mcts mcts) {
+    private static Action getActionFromMctsSearch(State state, SearchTree mcts) {
         Action mostPromisingAction;
         state.setSearchModeOn();
         updateHidersMostProbablePosition(state);

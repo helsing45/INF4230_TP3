@@ -1,6 +1,5 @@
 package main.java.search;
 
-import main.java.cloning.Cloner;
 import main.java.model.Action;
 import main.java.model.State;
 import main.java.players.Player;
@@ -8,31 +7,24 @@ import main.java.players.Player;
 import java.util.Collections;
 import java.util.List;
 
-public class Mcts {
+public class SearchTree {
 
     private static final double NO_EXPLORATION = 0;
 
     private final int numberOfIterations;
     private double explorationParameter;
-    private final Cloner cloner;
 
-    public static Mcts initializeIterations(int numberOfIterations) {
-        Cloner cloner = new Cloner();
-        return new Mcts(numberOfIterations, cloner);
+    public static SearchTree initializeIterations(int numberOfIterations) {
+        return new SearchTree(numberOfIterations);
     }
 
-    private Mcts(int numberOfIterations, Cloner cloner) {
+    private SearchTree(int numberOfIterations) {
         this.numberOfIterations = numberOfIterations;
-        this.cloner = cloner;
-    }
-
-    public void dontClone(final Class<?>... classes) {
-        cloner.dontClone(classes);
     }
 
     public Action uctSearchWithExploration(State state, double explorationParameter) {
         setExplorationForSearch(explorationParameter);
-        MctsTreeNode rootNode = new MctsTreeNode(state, cloner);
+        SearchTreeNode rootNode = new SearchTreeNode(state);
         for (int i = 0; i < numberOfIterations; i++) {
             performMctsIteration(rootNode, state.getCurrentAgent());
         }
@@ -43,13 +35,13 @@ public class Mcts {
         this.explorationParameter = explorationParameter;
     }
 
-    private void performMctsIteration(MctsTreeNode rootNode, Player agentInvoking) {
-        MctsTreeNode selectedChildNode = treePolicy(rootNode);
+    private void performMctsIteration(SearchTreeNode rootNode, Player agentInvoking) {
+        SearchTreeNode selectedChildNode = treePolicy(rootNode);
         State terminalState = getTerminalStateFromDefaultPolicy(selectedChildNode, agentInvoking);
         backPropagate(selectedChildNode, terminalState);
     }
 
-    private MctsTreeNode treePolicy(MctsTreeNode node) {
+    private SearchTreeNode treePolicy(SearchTreeNode node) {
         while (!node.representsTerminalState()) {
             if (!node.representedStatesCurrentAgentHasAvailableActions())
                 return expandWithoutAction(node);
@@ -62,27 +54,27 @@ public class Mcts {
     }
 
 
-    private MctsTreeNode expandWithoutAction(MctsTreeNode node) {
+    private SearchTreeNode expandWithoutAction(SearchTreeNode node) {
         return node.addNewChildWithoutAction();
     }
 
-    private MctsTreeNode expandWithAction(MctsTreeNode node) {
+    private SearchTreeNode expandWithAction(SearchTreeNode node) {
         Action randomUntriedAction = getRandomActionFromNodesUntriedActions(node);
         return node.addNewChildFromAction(randomUntriedAction);
     }
 
-    private Action getRandomActionFromNodesUntriedActions(MctsTreeNode node) {
+    private Action getRandomActionFromNodesUntriedActions(SearchTreeNode node) {
         List<Action> untriedActions = node.getUntriedActionsForCurrentAgent();
         Collections.shuffle(untriedActions);
         return untriedActions.get(0);
     }
 
-    private MctsTreeNode getNodesBestChild(MctsTreeNode node) {
+    private SearchTreeNode getNodesBestChild(SearchTreeNode node) {
         //validateBestChildComputable(node);
         return getNodesBestChildConfidentlyWithExploration(node, explorationParameter);
     }
 
-    /*private void validateBestChildComputable(MctsTreeNode node) {
+    /*private void validateBestChildComputable(SearchTreeNode node) {
         if (!node.hasChildNodes())
             throw new UnsupportedOperationException("Error: operation not supported if child nodes empty");
         else if (!node.isFullyExpanded())
@@ -92,41 +84,41 @@ public class Mcts {
                     "Error: operation not supported if node contains an unvisited child");
     }*/
 
-    private Action getNodesMostPromisingAction(MctsTreeNode node) {
+    private Action getNodesMostPromisingAction(SearchTreeNode node) {
         //validateBestChildComputable(node);
-        MctsTreeNode bestChildWithoutExploration =
+        SearchTreeNode bestChildWithoutExploration =
                 getNodesBestChildConfidentlyWithExploration(node, NO_EXPLORATION);
         return bestChildWithoutExploration.getIncomingAction();
     }
 
-    private MctsTreeNode getNodesBestChildConfidentlyWithExploration(
-            MctsTreeNode node, double explorationParameter) {
+    private SearchTreeNode getNodesBestChildConfidentlyWithExploration(
+            SearchTreeNode node, double explorationParameter) {
         return node.getChildNodes().stream()
                 .max((node1, node2) -> Double.compare(
                         calculateUctValue(node1, explorationParameter),
                         calculateUctValue(node2, explorationParameter))).get();
     }
 
-    private double calculateUctValue(MctsTreeNode node, double explorationParameter) {
+    private double calculateUctValue(SearchTreeNode node, double explorationParameter) {
         return node.getDomainTheoreticValue()
                 + explorationParameter
                 * (Math.sqrt((2 * Math.log(node.getParentsVisitCount())) / node.getVisitCount()));
     }
 
     private State getTerminalStateFromDefaultPolicy(
-            MctsTreeNode node, Player agentInvoking) {
-        State nodesStateClone = node.getDeepCloneOfRepresentedState();
+            SearchTreeNode node, Player agentInvoking) {
+        State nodesStateClone = node.getCopyOfRepresentedState();
         return agentInvoking.getTerminalStateByPerformingSimulationFromState(nodesStateClone);
     }
 
-    private void backPropagate(MctsTreeNode node, State terminalState) {
+    private void backPropagate(SearchTreeNode node, State terminalState) {
         while (node != null) {
             updateNodesDomainTheoreticValue(node, terminalState);
             node = node.getParentNode();
         }
     }
 
-    private void updateNodesDomainTheoreticValue(MctsTreeNode node, State terminalState) {
+    private void updateNodesDomainTheoreticValue(SearchTreeNode node, State terminalState) {
         // violation of the law of demeter
         Player parentsStatesCurrentAgent = node.getRepresentedStatesPreviousAgent();
         double reward = parentsStatesCurrentAgent.getRewardFromTerminalState(terminalState);

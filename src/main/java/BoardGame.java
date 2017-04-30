@@ -6,7 +6,7 @@ import main.java.model.State;
 import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
-import main.java.search.Mcts;
+import main.java.search.SearchTree;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
@@ -29,7 +29,7 @@ import static main.java.players.Player.Operator.COMPUTER;
 import static main.java.players.Player.Operator.HUMAN;
 
 public class BoardGame extends JApplet implements ListSelectionListener, SettingsDialog.Listener {
-    private static final int MCTS_ITERATIONS = 20;
+    private static final int ITERATIONS = 20;
     private static final double HIDERS_EXPLORATION = 0.2;
     private static final double SEEKERS_EXPLORATION = 2;
 
@@ -254,22 +254,26 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private void startGame() {
-        playGame(initializeSearch(),true);
+            playGame(initializeSearch(), true);
     }
 
-    public void playGame(Mcts mcts, boolean showWinner) {
+    private void playGame(SearchTree mcts, boolean showWinner) {
         Player[] players = initializePlayersWithOperator(hiderIsComputer ? COMPUTER : HUMAN,
                 seekerIsComputer ? COMPUTER : HUMAN);
         State state = State.initialize(players);
 
+        for (int i = 0; i < state.getNumberOfPlayers(); i++) {
+            map.setPlayerPos(i, state.getPlayersOnBoard().getLocationOf(i));
+        }
+        map.setCurrentPlayer(0);
         history = new ArrayList<>();
         tempAction = new Action[state.getNumberOfPlayers()];
 
         while (!state.isTerminal()) {
             performOneAction(state, mcts);
         }
-        if(showWinner){
-            JOptionPane.showMessageDialog(parentFrame, state.hiderWon() ? "Le criminel c'est enfuit." :"Le detective ont gagnee");
+        if (showWinner) {
+            JOptionPane.showMessageDialog(parentFrame, state.hiderWon() ? "Le criminel c'est enfuit." : "Le detective ont gagnee");
         }
 
     }
@@ -283,7 +287,8 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         return players;
     }
 
-    private void performOneAction(State state, Mcts mcts) {
+    private void performOneAction(State state, SearchTree mcts) {
+        // Le criminel et toujours lui qui commence le tour
         if (state.currentPlayerIsHider()) {
             state.printNewRound();
             state.printAllPositions();
@@ -291,10 +296,12 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
             tempAction = new Action[state.getNumberOfPlayers()];
         }
 
+        map.setCurrentPlayer(state.getCurrentPlayerIndex());
         if (currentPlayerCanMove(state)) {
             main.java.model.Action mostPromisingAction = getNextAction(state, mcts);
             tempAction[state.getCurrentPlayerIndex()] = mostPromisingAction;
             state.performActionForCurrentAgent(mostPromisingAction);
+            map.setPlayerPos(state.getCurrentPlayerIndex(), state.getPlayersOnBoard().getLocationOf(state.getCurrentPlayerIndex()));
         } else {
             state.skipCurrentAgent();
             tempAction[state.getCurrentPlayerIndex()] = null;
@@ -322,7 +329,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         }*/
     }
 
-    private Action getNextAction(State state, Mcts mcts) {
+    private Action getNextAction(State state, SearchTree mcts) {
         Action mostPromisingAction;
         if (state.currentPlayerIsHuman())
             mostPromisingAction = getActionFromInput(state);
@@ -342,7 +349,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         return actions.get(0);
     }
 
-    private Action getActionFromMctsSearch(State state, Mcts mcts) {
+    private Action getActionFromMctsSearch(State state, SearchTree mcts) {
         Action mostPromisingAction;
         state.setSearchModeOn();
         updateHidersMostProbablePosition(state);
@@ -364,7 +371,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
             state.updateHidersProbablePosition();
     }
 
-    private Action getActionFromSearch(State state, Mcts mcts) {
+    private Action getActionFromSearch(State state, SearchTree mcts) {
         if (state.currentPlayerIsRandom())
             return getRandomAction(state);
         else
@@ -375,8 +382,8 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         return state.getAvailableActionsForCurrentAgent().size() > 0;
     }
 
-    private static Mcts initializeSearch() {
-        return Mcts.initializeIterations(MCTS_ITERATIONS);
+    private static SearchTree initializeSearch() {
+        return SearchTree.initializeIterations(ITERATIONS);
     }
 
     @Override
