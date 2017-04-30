@@ -254,10 +254,10 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private void startGame() {
-        playGame(initializeSearch());
+        playGame(initializeSearch(),true);
     }
 
-    public void playGame(Mcts mcts) {
+    public void playGame(Mcts mcts, boolean showWinner) {
         Player[] players = initializePlayersWithOperator(hiderIsComputer ? COMPUTER : HUMAN,
                 seekerIsComputer ? COMPUTER : HUMAN);
         State state = State.initialize(players);
@@ -268,8 +268,10 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         while (!state.isTerminal()) {
             performOneAction(state, mcts);
         }
+        if(showWinner){
+            JOptionPane.showMessageDialog(parentFrame, state.hiderWon() ? "Le criminel c'est enfuit." :"Le detective ont gagnee");
+        }
 
-        boolean b = true;
     }
 
     private Player[] initializePlayersWithOperator(Player.Operator hider, Player.Operator seeker) {
