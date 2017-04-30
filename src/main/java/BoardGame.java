@@ -1,7 +1,8 @@
 package main.java;
 
-import main.java.model.*;
 import main.java.model.Action;
+import main.java.model.PlayersOnBoard;
+import main.java.model.State;
 import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
@@ -11,6 +12,7 @@ import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 import main.java.view.MapLabel;
 import main.java.view.SettingsDialog;
+import main.java.view.TableDialog;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -19,13 +21,15 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static main.java.players.Player.Operator.HUMAN;
 import static main.java.players.Player.Operator.COMPUTER;
+import static main.java.players.Player.Operator.HUMAN;
 
 public class BoardGame extends JApplet implements ListSelectionListener, SettingsDialog.Listener {
-    private static final int MCTS_ITERATIONS = 20000;
+    private static final int MCTS_ITERATIONS = 20;
     private static final double HIDERS_EXPLORATION = 0.2;
     private static final double SEEKERS_EXPLORATION = 2;
 
@@ -37,10 +41,13 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     MapLabel map;
     JComboBox cboAvailableMoves;
     SettingsDialog settingsDialog;
-    boolean canMove = true;
+
     boolean hiderIsComputer = true, seekerIsComputer = true;
     int detectiveCount = 5;
-    private static Player.Type humanType;
+
+
+    private List<Action[]> history;
+    private Action[] tempAction;
 
     public static void main(String args[]) {
         JFrame f = new JFrame("Scotland yard");
@@ -242,6 +249,8 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private void showPreviousMoves() {
+        TableDialog tb = new TableDialog(parentFrame, "Previous moves", history, this, false);
+        tb.setVisible(true);
     }
 
     private void startGame() {
@@ -252,26 +261,42 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         Player[] players = initializePlayersWithOperator(hiderIsComputer ? COMPUTER : HUMAN,
                 seekerIsComputer ? COMPUTER : HUMAN);
         State state = State.initialize(players);
+
+        history = new ArrayList<>();
+        tempAction = new Action[state.getNumberOfPlayers()];
+
         while (!state.isTerminal()) {
             performOneAction(state, mcts);
         }
+
+        boolean b = true;
     }
 
     private Player[] initializePlayersWithOperator(Player.Operator hider, Player.Operator seeker) {
         Player[] players = new Player[detectiveCount + 1];
-        players[0] = new Hider(hider, Playouts.Uses.GREEDY, CoalitionReduction.Uses.YES, MoveFiltering.Uses.YES);
+        players[0] = new Hider(hider, Playouts.Uses.BASIC, CoalitionReduction.Uses.YES, MoveFiltering.Uses.YES);
         for (int i = 1; i < players.length; i++)
-            players[i] = new Seeker(seeker, Seeker.Color.values()[i - 1], Playouts.Uses.GREEDY,
+            players[i] = new Seeker(seeker, Seeker.Color.values()[i - 1], Playouts.Uses.BASIC,
                     CoalitionReduction.Uses.YES, MoveFiltering.Uses.YES);
         return players;
     }
 
     private void performOneAction(State state, Mcts mcts) {
+        if (state.currentPlayerIsHider()) {
+            state.printNewRound();
+            state.printAllPositions();
+            history.add(tempAction);
+            tempAction = new Action[state.getNumberOfPlayers()];
+        }
+
         if (currentPlayerCanMove(state)) {
             main.java.model.Action mostPromisingAction = getNextAction(state, mcts);
+            tempAction[state.getCurrentPlayerIndex()] = mostPromisingAction;
             state.performActionForCurrentAgent(mostPromisingAction);
-        } else
+        } else {
             state.skipCurrentAgent();
+            tempAction[state.getCurrentPlayerIndex()] = null;
+        }
         askHumanForDoubleMove(state);
     }
 

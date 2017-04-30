@@ -256,6 +256,10 @@ public class PlayersOnBoard {
         hidersMostProbablePosition = playersActualPositions[HIDERS_INDEX];
     }
 
+    public int[] getPlayersActualPositions(){
+        return playersActualPositions;
+    }
+
     protected void recalculateHidersMostProbablePosition(Action.Transportation transportation) {
         hidersPossiblePositions = recalculateHidersPossiblePositions(transportation);
         hidersMostProbablePositionPreviousRound = hidersMostProbablePosition;

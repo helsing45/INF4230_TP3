@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class State implements MctsDomainState<Action, Player> , Cloneable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
-    private static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
+    public static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
     private static final int ALL_PLAYERS = 0;
     private static final int ONLY_SEEKERS = 1;
 
@@ -43,6 +43,10 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
         this.lastHidersTransportation = null;
         this.inSearch = false;
         this.searchInvokingPlayerIsHider = false;
+    }
+
+    public int getNumberOfPlayers(){
+        return numberOfPlayers;
     }
 
     public PlayersOnBoard getPlayersOnBoard() {
@@ -266,6 +270,10 @@ public class State implements MctsDomainState<Action, Player> , Cloneable{
 
     private boolean isLastPlayerOfRound() {
         return currentPlayerIndex == numberOfPlayers - 1;
+    }
+
+    public int getCurrentPlayerIndex(){
+        return currentPlayerIndex;
     }
 
     public void printAllPositions() {

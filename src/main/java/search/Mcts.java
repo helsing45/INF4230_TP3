@@ -1,5 +1,6 @@
 package main.java.search;
 
+import main.java.cloning.Cloner;
 import main.java.model.Action;
 import main.java.model.State;
 import main.java.players.Player;
@@ -13,18 +14,25 @@ public class Mcts {
 
     private final int numberOfIterations;
     private double explorationParameter;
+    private final Cloner cloner;
 
     public static Mcts initializeIterations(int numberOfIterations) {
-        return new Mcts(numberOfIterations);
+        Cloner cloner = new Cloner();
+        return new Mcts(numberOfIterations, cloner);
     }
 
-    private Mcts(int numberOfIterations) {
+    private Mcts(int numberOfIterations, Cloner cloner) {
         this.numberOfIterations = numberOfIterations;
+        this.cloner = cloner;
+    }
+
+    public void dontClone(final Class<?>... classes) {
+        cloner.dontClone(classes);
     }
 
     public Action uctSearchWithExploration(State state, double explorationParameter) {
         setExplorationForSearch(explorationParameter);
-        MctsTreeNode rootNode = new MctsTreeNode(state);
+        MctsTreeNode rootNode = new MctsTreeNode(state, cloner);
         for (int i = 0; i < numberOfIterations; i++) {
             performMctsIteration(rootNode, state.getCurrentAgent());
         }
@@ -70,11 +78,11 @@ public class Mcts {
     }
 
     private MctsTreeNode getNodesBestChild(MctsTreeNode node) {
-        validateBestChildComputable(node);
+        //validateBestChildComputable(node);
         return getNodesBestChildConfidentlyWithExploration(node, explorationParameter);
     }
 
-    private void validateBestChildComputable(MctsTreeNode node) {
+    /*private void validateBestChildComputable(MctsTreeNode node) {
         if (!node.hasChildNodes())
             throw new UnsupportedOperationException("Error: operation not supported if child nodes empty");
         else if (!node.isFullyExpanded())
@@ -82,11 +90,12 @@ public class Mcts {
         else if (node.hasUnvisitedChild())
             throw new UnsupportedOperationException(
                     "Error: operation not supported if node contains an unvisited child");
-    }
+    }*/
 
     private Action getNodesMostPromisingAction(MctsTreeNode node) {
-        validateBestChildComputable(node);
-        MctsTreeNode bestChildWithoutExploration = getNodesBestChildConfidentlyWithExploration(node, NO_EXPLORATION);
+        //validateBestChildComputable(node);
+        MctsTreeNode bestChildWithoutExploration =
+                getNodesBestChildConfidentlyWithExploration(node, NO_EXPLORATION);
         return bestChildWithoutExploration.getIncomingAction();
     }
 
