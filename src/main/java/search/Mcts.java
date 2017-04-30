@@ -1,7 +1,7 @@
 package main.java.search;
 
-import main.java.game.Action;
-import main.java.game.State;
+import main.java.model.Action;
+import main.java.model.State;
 import main.java.players.Player;
 
 import java.util.Collections;
@@ -86,8 +86,7 @@ public class Mcts {
 
     private Action getNodesMostPromisingAction(MctsTreeNode node) {
         validateBestChildComputable(node);
-        MctsTreeNode bestChildWithoutExploration =
-                getNodesBestChildConfidentlyWithExploration(node, NO_EXPLORATION);
+        MctsTreeNode bestChildWithoutExploration = getNodesBestChildConfidentlyWithExploration(node, NO_EXPLORATION);
         return bestChildWithoutExploration.getIncomingAction();
     }
 

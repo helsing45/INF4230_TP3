@@ -1,7 +1,7 @@
 package main.java;
 
-import main.java.game.Action;
-import main.java.game.State;
+import main.java.model.Action;
+import main.java.model.State;
 import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
@@ -88,11 +88,11 @@ public class ScotlandYard {
 
     private static Player[] initializePlayers(Player.Type humanType) {
         if (humanType == Player.Type.HIDER)
-            return initializePlayersWithOperator(Player.Operator.HUMAN, Player.Operator.MCTS);
+            return initializePlayersWithOperator(Player.Operator.HUMAN, Player.Operator.COMPUTER);
         else if (humanType == Player.Type.SEEKER)
-            return initializePlayersWithOperator(Player.Operator.MCTS, Player.Operator.HUMAN);
+            return initializePlayersWithOperator(Player.Operator.COMPUTER, Player.Operator.HUMAN);
         else
-            return initializePlayersWithOperator(Player.Operator.MCTS, Player.Operator.MCTS);
+            return initializePlayersWithOperator(Player.Operator.COMPUTER, Player.Operator.COMPUTER);
     }
 
     private static Player[] initializePlayersWithOperator(Player.Operator hider, Player.Operator seeker) {

@@ -1,6 +1,6 @@
 package main.java.utilities;
 
-import main.java.game.Action;
+import main.java.model.Action;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;

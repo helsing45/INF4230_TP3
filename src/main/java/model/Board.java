@@ -1,4 +1,4 @@
-package main.java.game;
+package main.java.model;
 
 import main.java.players.Player;
 import main.java.utilities.BoardFileParser;

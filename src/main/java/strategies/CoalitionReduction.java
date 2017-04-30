@@ -1,6 +1,6 @@
 package main.java.strategies;
 
-import main.java.game.State;
+import main.java.model.State;
 import main.java.players.Seeker;
 
 public class CoalitionReduction {

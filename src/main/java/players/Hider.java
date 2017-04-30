@@ -1,8 +1,8 @@
 package main.java.players;
 
-import main.java.game.Action;
-import main.java.game.PlayersOnBoard;
-import main.java.game.State;
+import main.java.model.Action;
+import main.java.model.PlayersOnBoard;
+import main.java.model.State;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;

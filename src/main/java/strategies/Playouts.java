@@ -1,8 +1,8 @@
 package main.java.strategies;
 
-import main.java.game.Action;
-import main.java.game.PlayersOnBoard;
-import main.java.game.State;
+import main.java.model.Action;
+import main.java.model.PlayersOnBoard;
+import main.java.model.State;
 
 import java.util.Collections;
 import java.util.List;

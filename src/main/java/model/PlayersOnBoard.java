@@ -1,4 +1,4 @@
-package main.java.game;
+package main.java.model;
 
 import main.java.players.Hider;
 import main.java.players.Player;
@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PlayersOnBoard {
-
-    private static final int NUMBER_OF_PLAYERS = 6;
+    public static final int NUMBER_OF_PLAYERS = 6;
     private static final int HIDERS_INDEX = 0;
     private static final int SKIP_HIDER = 1;
     private static final List<Integer> POSSIBLE_STARTING_POSITIONS = new ArrayList<Integer>(

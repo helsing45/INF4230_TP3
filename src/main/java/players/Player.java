@@ -1,7 +1,7 @@
 package main.java.players;
 
-import main.java.game.Action;
-import main.java.game.State;
+import main.java.model.Action;
+import main.java.model.State;
 import main.java.search.MctsDomainAgent;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
@@ -10,7 +10,7 @@ import main.java.strategies.Playouts;
 public abstract class Player implements MctsDomainAgent<State> {
 
     public enum Operator {
-        HUMAN, MCTS, RANDOM
+        HUMAN, COMPUTER, RANDOM
     }
 
     public enum Type {
