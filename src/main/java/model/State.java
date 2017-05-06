@@ -16,8 +16,6 @@ public class State implements Serializable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
     public static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
-    private static final int ALL_PLAYERS = 0;
-    private static final int ONLY_SEEKERS = 1;
 
     private final PlayersOnBoard playersOnBoard;
     private final int numberOfPlayers;
@@ -101,13 +99,15 @@ public class State implements Serializable{
         return inSearch && !searchInvokingPlayerIsHider;
     }
 
-    public void printNewRound() {
+    public String printNewRound() {
+        String string = null;
         if (currentPlayerIsHider()) {
-            System.out.println("ROUND: " + currentRound);
+            string = "ROUND: " + currentRound;
             if (isHiderSurfacesRound())
-                System.out.println("HIDER SURFACES!");
-            System.out.println("----------");
+                string += ("\n HIDER SURFACES!");
+            string += ("\n ----------");
         }
+        return string;
     }
 
     public boolean isHiderSurfacesRound() {
@@ -268,14 +268,6 @@ public class State implements Serializable{
 
     public int getCurrentPlayerIndex(){
         return currentPlayerIndex;
-    }
-
-    public void printAllPositions() {
-        playersOnBoard.printPlayers(ALL_PLAYERS);
-    }
-
-    public void printSeekersPositions() {
-        playersOnBoard.printPlayers(ONLY_SEEKERS);
     }
 
     public void updateHidersProbablePosition() {

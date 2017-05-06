@@ -12,6 +12,7 @@ public class SettingsDialog extends JDialog {
     private JSpinner spinner1;
     private JRadioButton computerCriminalButton;
     private JRadioButton joueurCriminalButton;
+    private JCheckBox debugMode;
     private Listener listener;
 
     public SettingsDialog(Listener listener) {
@@ -59,7 +60,12 @@ public class SettingsDialog extends JDialog {
     }
 
     private void onOK() {
-        listener.onSettingsChange(isCriminalIsComputer(),isDetectiveIsComputer(),getDetectiveCount());
+        Setting setting = new Setting();
+        setting.setCriminalIsComputer(computerCriminalButton.isSelected());
+        setting.setDetectiveIsComputer(computerDetectiveButton.isSelected());
+        setting.setDebugMode(debugMode.isSelected());
+        setting.setDetectiveCount(((Double)spinner1.getValue()).intValue());
+        listener.onSettingsChange(setting);
         dispose();
     }
 
@@ -79,7 +85,51 @@ public class SettingsDialog extends JDialog {
         return ((Double)spinner1.getValue()).intValue();
     }
 
+    public static class Setting{
+        boolean isCriminalIsComputer, isDetectiveIsComputer,debugMode;
+        int detectiveCount;
+
+        public Setting() {
+            isCriminalIsComputer = true;
+            isDetectiveIsComputer = true;
+            debugMode = false;
+            detectiveCount = 5;
+        }
+
+        public boolean isCriminalIsComputer() {
+            return isCriminalIsComputer;
+        }
+
+        public void setCriminalIsComputer(boolean criminalIsComputer) {
+            isCriminalIsComputer = criminalIsComputer;
+        }
+
+        public boolean isDetectiveIsComputer() {
+            return isDetectiveIsComputer;
+        }
+
+        public void setDetectiveIsComputer(boolean detectiveIsComputer) {
+            isDetectiveIsComputer = detectiveIsComputer;
+        }
+
+        public boolean isDebugMode() {
+            return debugMode;
+        }
+
+        public void setDebugMode(boolean debugMode) {
+            this.debugMode = debugMode;
+        }
+
+        public int getDetectiveCount() {
+            return detectiveCount;
+        }
+
+        public void setDetectiveCount(int detectiveCount) {
+            this.detectiveCount = detectiveCount;
+        }
+    }
+
     public interface Listener{
-        void onSettingsChange(boolean isCriminalIsComputer, boolean isDetectiveIsComputer, int detectiveCount);
+        void onSettingsChange(Setting setting);
     }
 }

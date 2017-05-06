@@ -27,7 +27,6 @@ public class PlayersOnBoard implements Serializable {
     private int hidersMostProbablePositionPreviousRound;
 
     protected static PlayersOnBoard initialize(Player[] players) {
-        validatePlayers(players);
         Board board = Board.initialize();
         int[] playersPositions = generateRandomPlayersPositions(players.length);
         List<Integer> hidersPossibleLocations = calculateInitialHidersPossibleLocations(playersPositions);
@@ -38,22 +37,6 @@ public class PlayersOnBoard implements Serializable {
     }
     public Point getLocationOf(int playerId){
         return board.getPoint(playersActualPositions[playerId]);
-    }
-
-    private static void validatePlayers(Player[] players) {
-        if (!numberOfPlayersValid(players))
-            throw new IllegalArgumentException("Error: invalid players passed as function parameter");
-        if (!playerTypesValid(players))
-            throw new IllegalArgumentException("Error: invalid players passed as function parameter");
-    }
-
-    private static boolean numberOfPlayersValid(Player[] players) {
-        return players.length == NUMBER_OF_PLAYERS;
-    }
-
-    private static boolean playerTypesValid(Player[] players) {
-        return players[HIDERS_INDEX].isHider()
-                && Arrays.stream(players).skip(SKIP_HIDER).allMatch(Player::isSeeker);
     }
 
     private static int[] generateRandomPlayersPositions(int numberOfPlayers) {
@@ -119,15 +102,14 @@ public class PlayersOnBoard implements Serializable {
         return players[playerIndex];
     }
 
-    public void printPlayers(int start) {
-        System.out.println("Players:");
-        for (int i = start; i < players.length; i++) {
-            System.out.println(players[i] + " on " + playersActualPositions[i] +
-                    " (taxi tickets: " + players[i].getTaxiTickets() +
-                    ", bus tickets: " + players[i].getBusTickets() +
-                    ", underground tickets: " + players[i].getUndergroundTickets() + ") ");
-        }
-        System.out.println();
+
+    public String printPlayers(int playerIndex, boolean revealAll){
+        String string =  players[playerIndex] + " sur ";
+        string += playerIndex != HIDERS_INDEX || revealAll ? playersActualPositions[playerIndex] :"inconnu";
+         string += " (taxi : " + players[playerIndex].getTaxiTickets() +
+                ", bus : " + players[playerIndex].getBusTickets() +
+                ", underground : " + players[playerIndex].getUndergroundTickets() + ") ";
+         return string;
     }
 
     protected boolean anySeekerOnHidersMostProbablePosition() {
