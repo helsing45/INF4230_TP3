@@ -9,11 +9,7 @@ import java.util.List;
 
 public class Playouts {
 
-    public enum Uses {
-        BASIC, GREEDY
-    }
-
-    private static final double EPSILON = 0.2;
+    private static final double EPSILON = 0.25;
 
     public static Action getRandomAction(State state) {
         List<Action> availableActions = state.getAvailableActionsForCurrentAgent();
@@ -24,11 +20,11 @@ public class Playouts {
             return null;
     }
 
-    public static Action getGreedyBiasedActionForHider(State state) {
+    public static Action getGreedyBiasedActionForCriminal(State state) {
         List<Action> actions = state.getAvailableActionsForCurrentAgent();
         if (actions.size() > 0) {
             if (shouldReturnBiasedAction())
-                return getBiasedActionForHiderConfidently(actions, state.getPlayersOnBoard());
+                return getBiasedActionForCriminalConfidently(actions, state.getPlayersOnBoard());
             else
                 return getRandomAction(state);
         }
@@ -36,11 +32,11 @@ public class Playouts {
             return null;
     }
 
-    public static Action getGreedyBiasedActionForSeeker(State state) {
+    public static Action getGreedyBiasedActionForDetective(State state) {
         List<Action> actions = state.getAvailableActionsForCurrentAgent();
         if (actions.size() > 0) {
             if (shouldReturnBiasedAction())
-                return getBiasedActionForSeekerConfidently(actions, state.getPlayersOnBoard());
+                return getBiasedActionForDetectiveConfidently(actions, state.getPlayersOnBoard());
             else
                 return getRandomAction(state);
         }
@@ -53,20 +49,20 @@ public class Playouts {
         return Math.random() > EPSILON;
     }
 
-    private static Action getBiasedActionForHiderConfidently(List<Action> actions, PlayersOnBoard playersOnBoard) {
+    private static Action getBiasedActionForCriminalConfidently(List<Action> actions, PlayersOnBoard playersOnBoard) {
         return actions.stream()
                 .max((action1, action2) -> Integer.compare(
-                        playersOnBoard.shortestDistanceBetweenPositionAndClosestSeeker(action1.getDestination()),
-                        playersOnBoard.shortestDistanceBetweenPositionAndClosestSeeker(action2.getDestination())))
+                        playersOnBoard.shortestDistanceBetweenPositionAndClosestDetective(action1.getDestination()),
+                        playersOnBoard.shortestDistanceBetweenPositionAndClosestDetective(action2.getDestination())))
                 .get();
     }
 
-    private static Action getBiasedActionForSeekerConfidently(List<Action> actions, PlayersOnBoard playersOnBoard) {
+    private static Action getBiasedActionForDetectiveConfidently(List<Action> actions, PlayersOnBoard playersOnBoard) {
         return actions.stream()
                 .min((action1, action2) -> Integer.compare(
-                        playersOnBoard.shortestDistanceBetweenPositionAndHidersMostProbablePosition(
+                        playersOnBoard.shortestDistanceBetweenPositionAndCriminalMostProbablePosition(
                                 action1.getDestination()),
-                        playersOnBoard.shortestDistanceBetweenPositionAndHidersMostProbablePosition(
+                        playersOnBoard.shortestDistanceBetweenPositionAndCriminalMostProbablePosition(
                                 action2.getDestination())))
                 .get();
     }

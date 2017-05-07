@@ -5,9 +5,7 @@ import main.java.model.State;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.Playouts;
 
-import java.awt.*;
-
-public class Seeker extends Player {
+public class Detective extends Player {
 
     private static final int TAXI_TICKETS = 10;
     private static final int BUS_TICKETS = 8;
@@ -19,25 +17,19 @@ public class Seeker extends Player {
 
     private final Color color;
 
-    public Seeker(Operator operator, Color color, Playouts.Uses playout, boolean canUseCoalitionReduction, boolean useMoveFiltering) {
-        super(operator, Type.SEEKER, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, playout, canUseCoalitionReduction, useMoveFiltering);
+    public Detective(boolean isHuman, Color color, boolean canUseCoalitionReduction, boolean useMoveFiltering) {
+        super(isHuman, Role.DETECTIVE, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, canUseCoalitionReduction, useMoveFiltering);
         this.color = color;
     }
 
     @Override
-    protected Action getActionForHiderFromStatesAvailableActionsForSimulation(State state) {
-        if (this.usesBiasedPlayout())
-            return Playouts.getGreedyBiasedActionForHider(state);
-        else
-            return Playouts.getRandomAction(state);
+    protected Action getActionForCriminalFromStatesAvailableActionsForSimulation(State state) {
+        return Playouts.getGreedyBiasedActionForCriminal(state);
     }
 
     @Override
-    protected Action getActionForSeekerFromStatesAvailableActionsForSimulation(State state) {
-        if (this.usesBiasedPlayout())
-            return Playouts.getGreedyBiasedActionForSeeker(state);
-        else
-            return Playouts.getRandomAction(state);
+    protected Action getActionForDetectiveFromStatesAvailableActionsForSimulation(State state) {
+        return Playouts.getGreedyBiasedActionForDetective(state);
     }
 
     @Override
@@ -52,8 +44,8 @@ public class Seeker extends Player {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Seeker seeker = (Seeker) o;
-        return color == seeker.color;
+        Detective detective = (Detective) o;
+        return color == detective.color;
     }
 
     @Override

@@ -14,12 +14,12 @@ public class Board implements Serializable{
 
     private static final String BOARD_NODE_LOCATION = "src/main/resources/board_position.xml";
     private static final String BOARD_FILE_NAME = "src/main/resources/board_file.xml";
-    private static final String HIDERS_DISTANCES_FILE_NAME = "src/main/resources/hiders_distances_file.xml";
-    private static final String SEEKERS_DISTANCES_FILE_NAME = "src/main/resources/seekers_distances_file.xml";
+    private static final String CRIMINALS_DISTANCES_FILE_NAME = "src/main/resources/criminals_distances_file.xml";
+    private static final String DETECTIVES_DISTANCES_FILE_NAME = "src/main/resources/detectives_distances_file.xml";
 
     private final List<List<Action>> positionsActions;
-    private final List<List<Integer>> hidersDistances;
-    private final List<List<Integer>> seekersDistances;
+    private final List<List<Integer>> criminalsDistances;
+    private final List<List<Integer>> detectivesDistances;
     private final List<Point> locations;
 
     public static Board initialize() {
@@ -29,19 +29,19 @@ public class Board implements Serializable{
         BoardPositionFileParser boardLocationParser = new BoardPositionFileParser(BOARD_NODE_LOCATION);
         List<Point> locations = boardLocationParser.getParsedData();
 
-        DistancesFileParser distancesFileParser = new DistancesFileParser(HIDERS_DISTANCES_FILE_NAME);
-        List<List<Integer>> hidersDistances = distancesFileParser.getParsedData();
+        DistancesFileParser distancesFileParser = new DistancesFileParser(CRIMINALS_DISTANCES_FILE_NAME);
+        List<List<Integer>> criminalsDistances = distancesFileParser.getParsedData();
 
-        distancesFileParser = new DistancesFileParser(SEEKERS_DISTANCES_FILE_NAME);
-        List<List<Integer>> seekersDistances = distancesFileParser.getParsedData();
+        distancesFileParser = new DistancesFileParser(DETECTIVES_DISTANCES_FILE_NAME);
+        List<List<Integer>> detectivesDistances = distancesFileParser.getParsedData();
 
-        return new Board(positionsActions,locations, hidersDistances, seekersDistances);
+        return new Board(positionsActions,locations, criminalsDistances, detectivesDistances);
     }
 
-    private Board(List<List<Action>> positionsActions, List<Point> locations, List<List<Integer>> hidersDistances, List<List<Integer>> seekersDistances) {
+    private Board(List<List<Action>> positionsActions, List<Point> locations, List<List<Integer>> criminalsDistances, List<List<Integer>> detectivesDistances) {
         this.positionsActions = positionsActions;
-        this.hidersDistances = hidersDistances;
-        this.seekersDistances = seekersDistances;
+        this.criminalsDistances = criminalsDistances;
+        this.detectivesDistances = detectivesDistances;
         this.locations = locations;
     }
 
@@ -72,14 +72,14 @@ public class Board implements Serializable{
                 .collect(Collectors.toList());
     }
 
-    public int shortestDistanceBetween(int position1, int position2, Player.Type type) {
+    public int shortestDistanceBetween(int position1, int position2, Player.Role role) {
         if (position1 == position2)
             return 0;
         else
-            return shortestDistanceBetweenDifferent(position1, position2, type);
+            return shortestDistanceBetweenDifferent(position1, position2, role);
     }
 
-    public int shortestDistanceBetweenDifferent(int position1, int position2, Player.Type type) {
+    public int shortestDistanceBetweenDifferent(int position1, int position2, Player.Role role) {
         int index1, index2;
         if (position1 < position2) {
             index1 = position1 - 1;
@@ -89,9 +89,9 @@ public class Board implements Serializable{
             index1 = position2 - 1;
             index2 = (position1 - position2) - 1;
         }
-        if (type == Player.Type.HIDER)
-            return hidersDistances.get(index1).get(index2);
+        if (role == Player.Role.CRIMINAL)
+            return criminalsDistances.get(index1).get(index2);
         else
-            return seekersDistances.get(index1).get(index2);
+            return detectivesDistances.get(index1).get(index2);
     }
 }

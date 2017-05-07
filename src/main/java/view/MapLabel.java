@@ -1,15 +1,11 @@
 package main.java.view;
 
-import main.java.players.Seeker;
+import main.java.players.Detective;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class MapLabel extends JLabel implements ActionListener {
 
@@ -40,7 +36,7 @@ public class MapLabel extends JLabel implements ActionListener {
 
                     Point playerPos = getPlayerPos(i);
 
-                    drawCenteredCircle(g2,playerPos.x,playerPos.y,CIRCLE_R, Seeker.colors[i]);
+                    drawCenteredCircle(g2,playerPos.x,playerPos.y,CIRCLE_R, Detective.colors[i]);
                 }
             }
         }

@@ -26,7 +26,7 @@ public class MoveFiltering {
     }
 
     public static boolean optimalToUseDoubleMoveCard(PlayersOnBoard playersOnBoard) {
-        return playersOnBoard.hidersAverageDistanceToSeekers(Player.Type.SEEKER)
+        return playersOnBoard.criminalsAverageDistanceToDetectives(Player.Role.DETECTIVE)
                 <= SHOULD_USE_DOUBLE_MOVE_AVG_DISTANCE_THRESHOLD;
     }
 

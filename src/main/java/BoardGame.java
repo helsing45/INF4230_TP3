@@ -3,11 +3,10 @@ package main.java;
 import main.java.model.Action;
 import main.java.model.PlayersOnBoard;
 import main.java.model.State;
-import main.java.players.Hider;
+import main.java.players.Criminal;
 import main.java.players.Player;
-import main.java.players.Seeker;
+import main.java.players.Detective;
 import main.java.search.SearchTree;
-import main.java.strategies.Playouts;
 import main.java.view.MapLabel;
 import main.java.view.SettingsDialog;
 
@@ -19,12 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import static main.java.players.Player.Operator.COMPUTER;
-import static main.java.players.Player.Operator.HUMAN;
 
 public class BoardGame extends JApplet implements ListSelectionListener, SettingsDialog.Listener {
-    private static final double HIDERS_EXPLORATION = 0.2;
-    private static final double SEEKERS_EXPLORATION = 2;
 
     boolean gameStarted;
     JFrame parentFrame;
@@ -212,8 +207,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     private void playGame(SearchTree searchTree, boolean showWinner) {
         if (setting == null) setting = new SettingsDialog.Setting();
         messageArea.setText("");
-        Player[] players = initializePlayersWithOperator(setting.isCriminalIsComputer() ? COMPUTER : HUMAN,
-                setting.isDetectiveIsComputer() ? COMPUTER : HUMAN);
+        Player[] players = initializePlayersWithOperator(!setting.isCriminalIsComputer() , !setting.isDetectiveIsComputer());
         State state = State.initialize(players);
 
         for (int i = 0; i < state.getNumberOfPlayers(); i++) {
@@ -225,23 +219,22 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
             performOneAction(state, searchTree);
         }
         if (showWinner) {
-            JOptionPane.showMessageDialog(parentFrame, state.hiderWon() ? "Le criminel c'est enfuit." : "Le detective ont gagnee");
+            JOptionPane.showMessageDialog(parentFrame, state.criminalWon() ? "Le criminel c'est enfuit." : "Le detective ont gagnee");
         }
 
     }
 
-    private Player[] initializePlayersWithOperator(Player.Operator hider, Player.Operator seeker) {
+    private Player[] initializePlayersWithOperator(boolean criminalIsHuman, boolean detectiveIsHuman) {
         Player[] players = new Player[setting.getDetectiveCount() + 1];
-        players[0] = new Hider(hider, Playouts.Uses.GREEDY, true, true);
+        players[0] = new Criminal(criminalIsHuman, true, true);
         for (int i = 1; i < players.length; i++)
-            players[i] = new Seeker(seeker, Seeker.Color.values()[i - 1], Playouts.Uses.GREEDY,
-                    true, true);
+            players[i] = new Detective(detectiveIsHuman, Detective.Color.values()[i - 1], true, true);
         return players;
     }
 
     private void performOneAction(State state, SearchTree mcts) {
-        // Le criminel et toujours lui qui commence le tour
-        if (state.currentPlayerIsHider()) {
+        // Le criminel est toujours lui qui commence le tour
+        if (state.currentPlayerIsCriminal()) {
             printRound(state);
         }
 
@@ -253,15 +246,18 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
             printMove(state);
         } else {
             state.skipCurrentAgent();
-            message(state.getCurrentAgent() + " didn't move");
+            message(state.getCurrentAgent() + " n'a pas bouger");
         }
         askHumanForDoubleMove(state);
     }
 
     private void printRound(State state) {
-        String round = state.printNewRound();
-        if (round != null)
-            message(round);
+        String string;
+            string = ("\n ----------------------------\n");
+            string += "         Tour # " + state.getCurrentRound();
+            string += ("\n ----------------------------\n");
+
+            message(string);
     }
 
     private void printMove(State state) {
@@ -275,22 +271,22 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private static boolean shouldAskForDoubleMove(State state) {
-        return state.previousPlayerIsHider() && state.previousPlayerIsHuman();
+        return state.previousPlayerIsCriminal() && state.previousPlayerIsHuman();
     }
 
     private static void askHumanForDoubleMove(State state) {
         if (shouldAskForDoubleMove(state)) {
-            Hider hider = (Hider) state.getPreviousAgent();
-            if (hider.hasDoubleMoveCard())
-                askHumanForDoubleMoveConfidently(state, hider);
+            Criminal criminal = (Criminal) state.getPreviousAgent();
+            if (criminal.hasDoubleMoveCard())
+                askHumanForDoubleMoveConfidently(state, criminal);
         }
     }
 
-    private static void askHumanForDoubleMoveConfidently(State state, Hider hider) {
+    private static void askHumanForDoubleMoveConfidently(State state, Criminal criminal) {
         //TODO ask for double
         /*if (doubleMove.equals("y")) {
-            state.skipAllSeekers();
-            hider.removeDoubleMoveCard();
+            state.skipAllDetective();
+            criminal.removeDoubleMoveCard();
         }*/
     }
 
@@ -331,7 +327,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     private Action getActionFromSearchTree(State state, SearchTree mcts) {
         Action mostPromisingAction;
         state.setSearchModeOn();
-        updateHidersMostProbablePosition(state);
+        updateCriminalsMostProbablePosition(state);
         double explorationParameter = getAppropriateExplorationParameter(state);
         mostPromisingAction = mcts.uctSearchWithExploration(state, explorationParameter);
         state.setSearchModeOff();
@@ -339,15 +335,12 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private double getAppropriateExplorationParameter(State state) {
-        if (state.currentPlayerIsHider())
-            return HIDERS_EXPLORATION;
-        else
-            return SEEKERS_EXPLORATION;
+        return state.currentPlayerIsCriminal() ? 0.3 : 2;
     }
 
-    private void updateHidersMostProbablePosition(State state) {
+    private void updateCriminalsMostProbablePosition(State state) {
         if (state.isTerminal())
-            state.updateHidersProbablePosition();
+            state.updateCriminalProbablePosition();
     }
 
     private boolean currentPlayerCanMove(State state) {

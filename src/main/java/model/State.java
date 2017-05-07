@@ -1,8 +1,8 @@
 package main.java.model;
 
-import main.java.players.Hider;
+import main.java.players.Criminal;
 import main.java.players.Player;
-import main.java.players.Seeker;
+import main.java.players.Detective;
 import main.java.utilities.clone.DeepCopy;
 
 import java.io.Serializable;
@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 public class State implements Serializable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
-    public static final List<Integer> HIDER_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
+    public static final List<Integer> CRIMINAL_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
 
     private final PlayersOnBoard playersOnBoard;
     private final int numberOfPlayers;
     private int currentRound;
     private int currentPlayerIndex;
     private int previousPlayerIndex;
-    private Action.Transportation lastHidersTransportation;
+    private Action.Transportation lastCriminalTransportation;
     private boolean inSearch;
-    private boolean searchInvokingPlayerIsHider;
+    private boolean searchInvokingPlayerIsCriminal;
     private boolean searchInvokingPlayerUsesCoalitionReduction;
     private boolean searchInvokingPlayerUsesMoveFiltering;
 
@@ -39,9 +39,9 @@ public class State implements Serializable{
         this.currentRound = 1;
         this.currentPlayerIndex = 0;
         this.previousPlayerIndex = numberOfPlayers - 1;
-        this.lastHidersTransportation = null;
+        this.lastCriminalTransportation = null;
         this.inSearch = false;
-        this.searchInvokingPlayerIsHider = false;
+        this.searchInvokingPlayerIsCriminal = false;
     }
 
     public int getNumberOfPlayers(){
@@ -62,7 +62,7 @@ public class State implements Serializable{
 
     public void setSearchModeOn() {
         inSearch = true;
-        searchInvokingPlayerIsHider = playersOnBoard.playerIsHider(currentPlayerIndex);
+        searchInvokingPlayerIsCriminal = playersOnBoard.playerIsCriminal(currentPlayerIndex);
         searchInvokingPlayerUsesCoalitionReduction = playersOnBoard.playerUsesCoalitionReduction(currentPlayerIndex);
         searchInvokingPlayerUsesMoveFiltering = playersOnBoard.playerUsesMoveFiltering(currentPlayerIndex);
     }
@@ -75,12 +75,12 @@ public class State implements Serializable{
         inSearch = false;
     }
 
-    public boolean currentPlayerIsHider() {
-        return playersOnBoard.playerIsHider(currentPlayerIndex);
+    public boolean currentPlayerIsCriminal() {
+        return playersOnBoard.playerIsCriminal(currentPlayerIndex);
     }
 
-    public boolean previousPlayerIsHider() {
-        return playersOnBoard.playerIsHider(previousPlayerIndex);
+    public boolean previousPlayerIsCriminal() {
+        return playersOnBoard.playerIsCriminal(previousPlayerIndex);
     }
 
     public boolean currentPlayerIsHuman() {
@@ -91,99 +91,82 @@ public class State implements Serializable{
         return playersOnBoard.playerIsHuman(previousPlayerIndex);
     }
 
-    private boolean inSearchFromSeekersPov() {
-        return inSearch && !searchInvokingPlayerIsHider;
+    private boolean inSearchFromDetectivesPov() {
+        return inSearch && !searchInvokingPlayerIsCriminal;
     }
 
-    public String printNewRound() {
-        String string = null;
-        if (currentPlayerIsHider()) {
-            string = ("\n ----------------------------\n");
-            string += "         ROUND: " + currentRound;
-            string += ("\n ----------------------------\n");
-        }
-        return string;
+    public int getCurrentRound(){
+        return currentRound;
     }
 
-    public boolean isHiderSurfacesRound() {
-        return HIDER_SURFACES_ROUNDS.contains(currentRound);
+    public boolean isCriminalSurfacesRound() {
+        return CRIMINAL_SURFACES_ROUNDS.contains(currentRound);
     }
 
     public boolean isTerminal() {
-        return seekersWon() || hiderWon();
+        return detectiveWon() || criminalWon();
     }
 
-    public boolean seekersWon() {
-        if (inSearchFromSeekersPov())
-            return playersOnBoard.anySeekerOnHidersMostProbablePosition();
+    public boolean detectiveWon() {
+        if (inSearchFromDetectivesPov())
+            return playersOnBoard.anyDetectiveOnCriminalsMostProbablePosition();
         else
-            return playersOnBoard.anySeekerOnHidersActualPosition();
+            return playersOnBoard.anyDetectiveOnCriminalsActualPosition();
     }
 
-    public boolean hiderWon() {
+    public boolean criminalWon() {
         return currentRound == MAX_NUMBER_OF_ROUNDS;
     }
 
-    public boolean seekerWon(Seeker seeker) {
-        if (inSearchFromSeekersPov())
-            return playersOnBoard.seekerOnHidersMostProbablePosition(seeker);
+    public boolean detectiveWon(Detective detective) {
+        if (inSearchFromDetectivesPov())
+            return playersOnBoard.seekerOnCriminalsMostProbablePosition(detective);
         else
-            return playersOnBoard.seekerOnHidersActualPosition(seeker);
+            return playersOnBoard.seekerOnCriminalsActualPosition(detective);
     }
 
     public State performActionForCurrentAgent(Action action) {
-        validateIsAvailableAction(action);
-        if (inSearchFromSeekersPov())
-            playersOnBoard.movePlayerFromSeekersPov(currentPlayerIndex, action);
+        if (inSearchFromDetectivesPov())
+            playersOnBoard.movePlayerFromDetectivesPov(currentPlayerIndex, action);
         else
             playersOnBoard.movePlayerFromActualPosition(currentPlayerIndex, action);
-        if (currentPlayerIsHider())
-            lastHidersTransportation = action.getTransportation();
-        setHidersMostProbablePosition(lastHidersTransportation);
+        if (currentPlayerIsCriminal())
+            lastCriminalTransportation = action.getTransportation();
+        setCriminalMostProbablePosition(lastCriminalTransportation);
         prepareStateForNextPlayer();
         performDoubleMoveIfShould();
         return this;
     }
 
-    private void validateIsAvailableAction(Action action) {
-        if (!isAvailableAction(action)) {
-            throw new IllegalArgumentException("Error: invalid action passed as function parameter");
-        }
-    }
-
-    private boolean isAvailableAction(Action action) {
-        return getAvailableActionsForCurrentAgent().contains(action);
-    }
-
-    private void setHidersMostProbablePosition(Action.Transportation transportation) {
-        if (currentPlayerIsHider())
-            setHidersMostProbablePositionAfterHider(transportation);
+    private void setCriminalMostProbablePosition(Action.Transportation transportation) {
+        if (currentPlayerIsCriminal())
+            setCriminalsMostProbablePositionAfterCriminal(transportation);
         else
-            playersOnBoard.removeCurrentSeekersPositionFromPossibleHidersPositions(currentPlayerIndex);
+            playersOnBoard.removeCurrentDetectivePositionFromPossibleCriminalPositions(currentPlayerIndex);
     }
 
-    private void setHidersMostProbablePositionAfterHider(Action.Transportation transportation) {
-        if (isHiderSurfacesRound())
-            playersOnBoard.setHidersActualAsMostProbablePosition();
+    private void setCriminalsMostProbablePositionAfterCriminal(Action.Transportation transportation) {
+        if (isCriminalSurfacesRound())
+            playersOnBoard.setCriminalsActualAsMostProbablePosition();
         else
-            playersOnBoard.recalculateHidersMostProbablePosition(transportation);
+            playersOnBoard.recalculateCriminalsMostProbablePosition(transportation);
     }
 
     private void  performDoubleMoveIfShould() {
-        if (shouldCheckForHidersDoubleMoveAutomatically()) {
-            Hider hider = (Hider)getPreviousAgent();
-            if (hider.shouldUseDoubleMove(playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
-                skipAllSeekers();
-                hider.removeDoubleMoveCard();
+        if (shouldCheckForCriminalDoubleMoveAutomatically()) {
+            Criminal criminal = (Criminal)getPreviousAgent();
+            if (criminal.shouldUseDoubleMove(playersOnBoard, searchInvokingPlayerUsesMoveFiltering)) {
+                skipAllDetective();
+                criminal.removeDoubleMoveCard();
             }
         }
     }
 
-    private boolean shouldCheckForHidersDoubleMoveAutomatically() {
-        return previousPlayerIsHider() && (previousPlayerIsHuman() && inSearch || !previousPlayerIsHuman());
+    private boolean shouldCheckForCriminalDoubleMoveAutomatically() {
+        return previousPlayerIsCriminal() && (previousPlayerIsHuman() && inSearch || !previousPlayerIsHuman());
     }
 
-    public void skipAllSeekers() {
+    public void skipAllDetective() {
         currentPlayerIndex--;
         currentRound++;
     }
@@ -199,22 +182,22 @@ public class State implements Serializable{
 
     public List<Action> getAvailableActionsForCurrentAgent() {
         List<Action> availableActions;
-        if (inSearchFromSeekersPov())
-            availableActions = playersOnBoard.getAvailableActionsFromSeekersPov(currentPlayerIndex);
+        if (inSearchFromDetectivesPov())
+            availableActions = playersOnBoard.getAvailableActionsFromDetectivesPov(currentPlayerIndex);
         else
             availableActions = playersOnBoard.getAvailableActionsForActualPosition(currentPlayerIndex);
-        availableActions = addHidersBlackFairActions(availableActions);
+        availableActions = addCriminalPasseDroitActions(availableActions);
         return availableActions;
     }
 
-    private List<Action> addHidersBlackFairActions(List<Action> actions) {
-        if (currentPlayerIsHider()) {
+    private List<Action> addCriminalPasseDroitActions(List<Action> actions) {
+        if (currentPlayerIsCriminal()) {
             if (notHumanInSearch())
-                return addBlackFareActionsIfAvailableTickets(
-                        (Hider) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
+                return addPasseDroitActionsIfAvailableTickets(
+                        (Criminal) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
             else
-                return addBlackFareActionsForHiderIfOptimal(
-                        (Hider) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
+                return addPasseDroitForCriminalIfOptimal(
+                        (Criminal) playersOnBoard.getPlayerAtIndex(currentPlayerIndex), actions);
         }
         return actions;
     }
@@ -223,25 +206,25 @@ public class State implements Serializable{
         return currentPlayerIsHuman() && !inSearch;
     }
 
-    List<Action> addBlackFareActionsIfAvailableTickets(Hider hider, List<Action> actions) {
-        if (hider.hasBlackFareTicket())
-            return addBlackFareActions(actions);
+    List<Action> addPasseDroitActionsIfAvailableTickets(Criminal criminal, List<Action> actions) {
+        if (criminal.hasPasseDroit())
+            return addPasseDroitActions(actions);
         return actions;
     }
 
-    List<Action> addBlackFareActionsForHiderIfOptimal(Hider hider, List<Action> actions) {
-        if (hider.shouldUseBlackfareTicket(currentRound, actions, searchInvokingPlayerUsesMoveFiltering))
-            return addBlackFareActions(actions);
+    List<Action> addPasseDroitForCriminalIfOptimal(Criminal criminal, List<Action> actions) {
+        if (criminal.shouldUsePasseDroit(currentRound, actions, searchInvokingPlayerUsesMoveFiltering))
+            return addPasseDroitActions(actions);
         return actions;
     }
 
-    private List<Action> addBlackFareActions(List<Action> actions) {
-        List<Action> blackFareActions = generateBlackfareActions(actions);
+    private List<Action> addPasseDroitActions(List<Action> actions) {
+        List<Action> blackFareActions = generatePasseDroitActions(actions);
         actions.addAll(blackFareActions);
         return removeDuplicates(actions);
     }
 
-    private List<Action> generateBlackfareActions(List<Action> actions) {
+    private List<Action> generatePasseDroitActions(List<Action> actions) {
         return actions.stream()
                 .map(Action::generatePasseDroitAction).collect(Collectors.toList());
     }
@@ -265,8 +248,8 @@ public class State implements Serializable{
         return currentPlayerIndex;
     }
 
-    public void updateHidersProbablePosition() {
-        playersOnBoard.fixHidersProbablePosition();
+    public void updateCriminalProbablePosition() {
+        playersOnBoard.fixCriminalProbablePosition();
     }
 
     public State copy(){

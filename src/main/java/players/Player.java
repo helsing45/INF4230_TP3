@@ -1,9 +1,7 @@
 package main.java.players;
 
-import javafx.scene.paint.Color;
 import main.java.model.Action;
 import main.java.model.State;
-import main.java.strategies.Playouts;
 
 import java.io.Serializable;
 
@@ -18,29 +16,24 @@ public abstract class Player implements Serializable {
             java.awt.Color.RED,
             java.awt.Color.GREEN
     };
-    public enum Operator {
-        HUMAN, COMPUTER
+
+    public enum Role {
+        CRIMINAL, DETECTIVE
     }
 
-    public enum Type {
-        HIDER, SEEKER
-    }
-
-    private final Operator operator;
-    private final Type type;
+    private boolean isHuman;
+    private final Role role;
     private int taxiTickets;
     private int busTickets;
     private int metroTickets;
-    private final Playouts.Uses playout;
     private final boolean useCoalitionReduction, useMoveFiltering;
 
-    protected Player(Operator operator, Type type, int taxiTickets, int busTickets, int metroTickets, Playouts.Uses playout, boolean useCoalitionReduction, boolean useMoveFiltering) {
-        this.operator = operator;
-        this.type = type;
+    protected Player(boolean isHuman, Role role, int taxiTickets, int busTickets, int metroTickets, boolean useCoalitionReduction, boolean useMoveFiltering) {
+        this.isHuman = isHuman;
+        this.role = role;
         this.taxiTickets = taxiTickets;
         this.busTickets = busTickets;
         this.metroTickets = metroTickets;
-        this.playout = playout;
         this.useCoalitionReduction = useCoalitionReduction;
         this.useMoveFiltering = useMoveFiltering;
     }
@@ -57,16 +50,16 @@ public abstract class Player implements Serializable {
         return metroTickets;
     }
 
-    public boolean isHider() {
-        return type == Type.HIDER;
+    public boolean isCriminal() {
+        return role == Role.CRIMINAL;
     }
 
-    public boolean isSeeker() {
-        return type == Type.SEEKER;
+    public boolean isDetective() {
+        return role == Role.DETECTIVE;
     }
 
     public boolean isHuman() {
-        return operator == Operator.HUMAN;
+        return isHuman;
     }
 
     public boolean hasTaxiTickets() {
@@ -118,10 +111,6 @@ public abstract class Player implements Serializable {
         return state;
     }
 
-    boolean usesBiasedPlayout() {
-        return playout == Playouts.Uses.GREEDY;
-    }
-
     public boolean usesCoalitionReduction() {
         return useCoalitionReduction;
     }
@@ -131,15 +120,15 @@ public abstract class Player implements Serializable {
     }
 
     private Action getActionForCurrentPlayerType(State state) {
-        if (state.currentPlayerIsHider())
-            return getActionForHiderFromStatesAvailableActionsForSimulation(state);
+        if (state.currentPlayerIsCriminal())
+            return getActionForCriminalFromStatesAvailableActionsForSimulation(state);
         else
-            return getActionForSeekerFromStatesAvailableActionsForSimulation(state);
+            return getActionForDetectiveFromStatesAvailableActionsForSimulation(state);
     }
 
-    protected abstract Action getActionForHiderFromStatesAvailableActionsForSimulation(State state);
+    protected abstract Action getActionForCriminalFromStatesAvailableActionsForSimulation(State state);
 
-    protected abstract Action getActionForSeekerFromStatesAvailableActionsForSimulation(State state);
+    protected abstract Action getActionForDetectiveFromStatesAvailableActionsForSimulation(State state);
 
     public abstract double getRewardFromTerminalState(State terminalState);
 }
