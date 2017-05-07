@@ -23,7 +23,6 @@ import static main.java.players.Player.Operator.COMPUTER;
 import static main.java.players.Player.Operator.HUMAN;
 
 public class BoardGame extends JApplet implements ListSelectionListener, SettingsDialog.Listener {
-    private static final int ITERATIONS = 20;
     private static final double HIDERS_EXPLORATION = 0.2;
     private static final double SEEKERS_EXPLORATION = 2;
 
@@ -31,7 +30,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     JFrame parentFrame;
     Container container;
     JButton done, start;
-    JTextField txtInfo, detectiveStatus;
+    JTextField txtInfo;
     MapLabel map;
     JComboBox cboAvailableMoves;
     JTextArea messageArea;
@@ -355,8 +354,9 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         return state.getAvailableActionsForCurrentAgent().size() > 0;
     }
 
-    private static SearchTree initializeSearch() {
-        return SearchTree.initializeIterations(ITERATIONS);
+    private SearchTree initializeSearch() {
+        if(setting == null) setting = new SettingsDialog.Setting();
+        return SearchTree.initializeIterations(setting.getIterationCount());
     }
 
     @Override

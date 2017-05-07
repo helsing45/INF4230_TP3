@@ -4,15 +4,18 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class SettingsDialog extends JDialog {
+    private static final int DEFAULT_SEEKER_COUNT = 4, DEFAULT_ITERATION_COUNT = 50;
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JRadioButton joueurDetectiveButton;
     private JRadioButton computerDetectiveButton;
-    private JSpinner spinner1;
+    private JSpinner detectiveCountSpinner;
     private JRadioButton computerCriminalButton;
     private JRadioButton joueurCriminalButton;
     private JCheckBox debugMode;
+    private JSpinner iterationCountSpinner;
     private Listener listener;
 
     public SettingsDialog(Listener listener) {
@@ -56,7 +59,8 @@ public class SettingsDialog extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        spinner1.setModel(new SpinnerNumberModel(4.0,1.0,5.0,1.0));
+        detectiveCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_SEEKER_COUNT,1.0,5.0,1.0));
+        iterationCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_ITERATION_COUNT,1.0,20000,1.0));
     }
 
     private void onOK() {
@@ -64,7 +68,8 @@ public class SettingsDialog extends JDialog {
         setting.setCriminalIsComputer(computerCriminalButton.isSelected());
         setting.setDetectiveIsComputer(computerDetectiveButton.isSelected());
         setting.setDebugMode(debugMode.isSelected());
-        setting.setDetectiveCount(((Double)spinner1.getValue()).intValue());
+        setting.setDetectiveCount(((Double) detectiveCountSpinner.getValue()).intValue());
+        setting.setIterationCount(((Double) iterationCountSpinner.getValue()).intValue());
         listener.onSettingsChange(setting);
         dispose();
     }
@@ -82,18 +87,20 @@ public class SettingsDialog extends JDialog {
     }
 
     public int getDetectiveCount(){
-        return ((Double)spinner1.getValue()).intValue();
+        return ((Double) detectiveCountSpinner.getValue()).intValue();
     }
+
 
     public static class Setting{
         boolean isCriminalIsComputer, isDetectiveIsComputer,debugMode;
-        int detectiveCount;
+        int detectiveCount,iterationCount;
 
         public Setting() {
             isCriminalIsComputer = true;
             isDetectiveIsComputer = true;
             debugMode = false;
-            detectiveCount = 5;
+            detectiveCount = DEFAULT_SEEKER_COUNT;
+            iterationCount = DEFAULT_ITERATION_COUNT;
         }
 
         public boolean isCriminalIsComputer() {
@@ -126,6 +133,14 @@ public class SettingsDialog extends JDialog {
 
         public void setDetectiveCount(int detectiveCount) {
             this.detectiveCount = detectiveCount;
+        }
+
+        public int getIterationCount() {
+            return iterationCount;
+        }
+
+        public void setIterationCount(int iterationCount) {
+            this.iterationCount = iterationCount;
         }
     }
 
