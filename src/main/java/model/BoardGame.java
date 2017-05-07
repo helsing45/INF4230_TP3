@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Board implements Serializable{
+public class BoardGame implements Serializable{
 
     private static final String BOARD_NODE_LOCATION = "src/main/resources/board_position.xml";
     private static final String BOARD_FILE_NAME = "src/main/resources/board_file.xml";
@@ -22,7 +22,7 @@ public class Board implements Serializable{
     private final List<List<Integer>> detectivesDistances;
     private final List<Point> locations;
 
-    public static Board initialize() {
+    public BoardGame(){
         BoardFileParser boardFileParser = new BoardFileParser(BOARD_FILE_NAME);
         List<List<Action>> positionsActions = boardFileParser.getParsedData();
 
@@ -34,11 +34,6 @@ public class Board implements Serializable{
 
         distancesFileParser = new DistancesFileParser(DETECTIVES_DISTANCES_FILE_NAME);
         List<List<Integer>> detectivesDistances = distancesFileParser.getParsedData();
-
-        return new Board(positionsActions,locations, criminalsDistances, detectivesDistances);
-    }
-
-    private Board(List<List<Action>> positionsActions, List<Point> locations, List<List<Integer>> criminalsDistances, List<List<Integer>> detectivesDistances) {
         this.positionsActions = positionsActions;
         this.criminalsDistances = criminalsDistances;
         this.detectivesDistances = detectivesDistances;
@@ -59,8 +54,7 @@ public class Board implements Serializable{
         return positionsActions.get(position - 1);
     }
 
-    public List<Integer> getTransportationDestinationsForPosition (
-            Action.Transportation transportation, int position) {
+    public List<Integer> getTransportationDestinationsForPosition (Action.Transportation transportation, int position) {
         return getTransportationActionsForPosition(transportation, position).stream()
                 .map(Action::getDestination)
                 .collect(Collectors.toList());

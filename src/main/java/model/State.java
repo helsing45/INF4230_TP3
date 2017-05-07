@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class State implements Serializable{
 
     private static final int MAX_NUMBER_OF_ROUNDS = 24;
-    public static final List<Integer> CRIMINAL_SURFACES_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
+    public static final List<Integer> CRIMINAL_REVEAL_ROUNDS = new ArrayList<>(Arrays.asList(3, 8, 13, 18, 24));
 
     private final PlayersOnBoard playersOnBoard;
     private final int numberOfPlayers;
@@ -28,9 +28,9 @@ public class State implements Serializable{
     private boolean searchInvokingPlayerUsesCoalitionReduction;
     private boolean searchInvokingPlayerUsesMoveFiltering;
 
-    public static State initialize(Player[] players) {
-        PlayersOnBoard playersOnBoard = PlayersOnBoard.initialize(players);
-        return new State(playersOnBoard, players.length);
+
+    public State(Player[] players) {
+        this(new PlayersOnBoard(players),players.length);
     }
 
     private State(PlayersOnBoard playersOnBoard, int numberOfPlayers) {
@@ -91,6 +91,9 @@ public class State implements Serializable{
         return playersOnBoard.playerIsHuman(previousPlayerIndex);
     }
 
+    /**
+     * Determine si on est entrait de faire des estimations.
+     */
     private boolean inSearchFromDetectivesPov() {
         return inSearch && !searchInvokingPlayerIsCriminal;
     }
@@ -100,7 +103,7 @@ public class State implements Serializable{
     }
 
     public boolean isCriminalSurfacesRound() {
-        return CRIMINAL_SURFACES_ROUNDS.contains(currentRound);
+        return CRIMINAL_REVEAL_ROUNDS.contains(currentRound);
     }
 
     public boolean isTerminal() {

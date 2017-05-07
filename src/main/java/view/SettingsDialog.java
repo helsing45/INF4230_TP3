@@ -9,11 +9,11 @@ public class SettingsDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JRadioButton joueurDetectiveButton;
+    private JRadioButton humanDetectiveButton;
     private JRadioButton computerDetectiveButton;
     private JSpinner detectiveCountSpinner;
     private JRadioButton computerCriminalButton;
-    private JRadioButton joueurCriminalButton;
+    private JRadioButton humanCriminalButton;
     private JCheckBox debugMode;
     private JSpinner iterationCountSpinner;
     private Listener listener;
@@ -25,12 +25,12 @@ public class SettingsDialog extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
 
         ButtonGroup detective = new ButtonGroup();
-        detective.add(joueurDetectiveButton);
+        detective.add(humanDetectiveButton);
         detective.add(computerDetectiveButton);
 
         ButtonGroup criminal = new ButtonGroup();
         criminal.add(computerCriminalButton);
-        criminal.add(joueurCriminalButton);
+        criminal.add(humanCriminalButton);
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -59,14 +59,14 @@ public class SettingsDialog extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        detectiveCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_SEEKER_COUNT,1.0,5.0,1.0));
-        iterationCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_ITERATION_COUNT,1.0,20000,1.0));
+        detectiveCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_SEEKER_COUNT, 1.0, 5.0, 1.0));
+        iterationCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_ITERATION_COUNT, 1.0, 20000, 1.0));
     }
 
     private void onOK() {
         Setting setting = new Setting();
-        setting.setCriminalIsComputer(computerCriminalButton.isSelected());
-        setting.setDetectiveIsComputer(computerDetectiveButton.isSelected());
+        setting.setCriminalHuman(humanCriminalButton.isSelected());
+        setting.setDetectiveHuman(humanDetectiveButton.isSelected());
         setting.setDebugMode(debugMode.isSelected());
         setting.setDetectiveCount(((Double) detectiveCountSpinner.getValue()).intValue());
         setting.setIterationCount(((Double) iterationCountSpinner.getValue()).intValue());
@@ -78,45 +78,45 @@ public class SettingsDialog extends JDialog {
         dispose();
     }
 
-    public boolean isCriminalIsComputer(){
+    public boolean isCriminalIsComputer() {
         return computerCriminalButton.isSelected();
     }
 
-    public boolean isDetectiveIsComputer(){
+    public boolean isDetectiveIsComputer() {
         return computerDetectiveButton.isSelected();
     }
 
-    public int getDetectiveCount(){
+    public int getDetectiveCount() {
         return ((Double) detectiveCountSpinner.getValue()).intValue();
     }
 
 
-    public static class Setting{
-        boolean isCriminalIsComputer, isDetectiveIsComputer,debugMode;
-        int detectiveCount,iterationCount;
+    public static class Setting {
+        boolean isCriminalHuman, isDetectiveHuman, debugMode;
+        int detectiveCount, iterationCount;
 
         public Setting() {
-            isCriminalIsComputer = true;
-            isDetectiveIsComputer = true;
+            isCriminalHuman = false;
+            isDetectiveHuman = false;
             debugMode = false;
             detectiveCount = DEFAULT_SEEKER_COUNT;
             iterationCount = DEFAULT_ITERATION_COUNT;
         }
 
-        public boolean isCriminalIsComputer() {
-            return isCriminalIsComputer;
+        public boolean isCriminalHuman() {
+            return isCriminalHuman;
         }
 
-        public void setCriminalIsComputer(boolean criminalIsComputer) {
-            isCriminalIsComputer = criminalIsComputer;
+        public void setCriminalHuman(boolean criminalHuman) {
+            isCriminalHuman = criminalHuman;
         }
 
-        public boolean isDetectiveIsComputer() {
-            return isDetectiveIsComputer;
+        public boolean isDetectiveHuman() {
+            return isDetectiveHuman;
         }
 
-        public void setDetectiveIsComputer(boolean detectiveIsComputer) {
-            isDetectiveIsComputer = detectiveIsComputer;
+        public void setDetectiveHuman(boolean detectiveHuman) {
+            isDetectiveHuman = detectiveHuman;
         }
 
         public boolean isDebugMode() {
@@ -144,7 +144,7 @@ public class SettingsDialog extends JDialog {
         }
     }
 
-    public interface Listener{
+    public interface Listener {
         void onSettingsChange(Setting setting);
     }
 }

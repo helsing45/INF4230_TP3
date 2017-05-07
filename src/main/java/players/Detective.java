@@ -12,7 +12,7 @@ public class Detective extends Player {
     private static final int UNDERGROUND_TICKETS = 4;
 
     public enum Color {
-        NOIRE, BLEU, JAUNE, ROUGE, VERT
+        ROSE, BLEU, JAUNE, ROUGE, VERT
     }
 
     private final Color color;

@@ -19,21 +19,27 @@ public class PlayersOnBoard implements Serializable {
             Arrays.asList(13, 26, 34, 50, 53, 62, 91, 94, 103, 112, 117, 132, 138, 141, 155, 174, 197, 198));
     private static final double[] DISTANCE_TO_CRIMINAL_PROBABILITIES = {0.196, 0.671, 0.540, 0.384, 0.196};
 
-    private final Board board;
-    private final Player[] players;
+    private BoardGame board;
+    private Player[] players;
     private int[] playersActualPositions;
     private List<Integer> criminalsPossiblePositions;
     private int criminalsMostProbablePosition;
     private int criminalsMostProbablePositionPreviousRound;
 
-    protected static PlayersOnBoard initialize(Player[] players) {
-        Board board = Board.initialize();
+    private PlayersOnBoard() {
+    }
+
+    public PlayersOnBoard(Player[] players) {
+        BoardGame board = new BoardGame();
         int[] playersPositions = generateRandomPlayersPositions(players.length);
         List<Integer> criminalsPossibleLocations = calculateInitialCriminalsPossibleLocations(playersPositions);
         Collections.shuffle(criminalsPossibleLocations);
         int criminalsMostProbablePosition = criminalsPossibleLocations.get(0);
-        return new PlayersOnBoard(board, players, playersPositions, criminalsPossibleLocations,
-                criminalsMostProbablePosition);
+        this.board = board;
+        this.players = players;
+        this.playersActualPositions = playersPositions;
+        this.criminalsPossiblePositions = criminalsPossibleLocations;
+        this.criminalsMostProbablePosition = criminalsMostProbablePosition;
     }
     public Point getLocationOf(int playerId){
         return board.getPoint(playersActualPositions[playerId]);
@@ -56,15 +62,9 @@ public class PlayersOnBoard implements Serializable {
                 .skip(SKIP_CRIMINAL).boxed().collect(Collectors.toList());
     }
 
-    private PlayersOnBoard(Board board, Player[] players, int[] playersPositions,List<Integer> criminalsPossiblePositions, int criminalsMostProbablePosition) {
-        this.board = board;
-        this.players = players;
-        this.playersActualPositions = playersPositions;
-        this.criminalsPossiblePositions = criminalsPossiblePositions;
-        this.criminalsMostProbablePosition = criminalsMostProbablePosition;
+    private PlayersOnBoard(BoardGame board, Player[] players, int[] playersPositions, List<Integer> criminalsPossiblePositions, int criminalsMostProbablePosition) {
+
     }
-
-
 
     public double criminalsAverageDistanceToDetectives(Player.Role role) {
         int criminalsPosition = playersActualPositions[CRIMINAL_INDEX];
@@ -99,7 +99,7 @@ public class PlayersOnBoard implements Serializable {
     }
 
 
-    public String printPlayers(int playerIndex, boolean revealAll){
+    public String getPlayerInfo(int playerIndex, boolean revealAll){
         String string =  players[playerIndex] + " sur ";
         string += playerIndex != CRIMINAL_INDEX || revealAll ? playersActualPositions[playerIndex] :"inconnu";
          string += " (taxi : " + players[playerIndex].getTaxiTickets() +

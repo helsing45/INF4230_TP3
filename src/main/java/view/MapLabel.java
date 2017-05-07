@@ -41,6 +41,11 @@ public class MapLabel extends JLabel implements ActionListener {
             }
         }
     }
+
+    public void setMrXVisible(boolean mrXVisible) {
+        this.mrXVisible = mrXVisible;
+    }
+
     public void drawCenteredCircle(Graphics2D g, int x, int y, int r, Color color) {
         x = x-(r/2);
         y = y-(r/2);

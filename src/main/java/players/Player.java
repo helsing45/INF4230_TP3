@@ -9,8 +9,8 @@ public abstract class Player implements Serializable {
 
 
     public static java.awt.Color[] colors = new java.awt.Color[]{
-            java.awt.Color.MAGENTA,
             java.awt.Color.BLACK,
+            java.awt.Color.MAGENTA,
             java.awt.Color.BLUE,
             java.awt.Color.YELLOW,
             java.awt.Color.RED,

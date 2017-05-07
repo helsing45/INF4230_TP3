@@ -43,14 +43,7 @@ public class Action implements Serializable{
     }
 
     @Override
-    public int hashCode() {
-        int result = transportation.hashCode();
-        result = 31 * result + destination;
-        return result;
-    }
-
-    @Override
     public String toString() {
-        return transportation + " to " + destination;
+        return transportation + " jusqu'à " + destination;
     }
 }
