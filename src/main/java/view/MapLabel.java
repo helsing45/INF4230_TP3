@@ -1,5 +1,7 @@
 package main.java.view;
 
+import main.java.players.Seeker;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -11,11 +13,7 @@ import java.io.IOException;
 
 public class MapLabel extends JLabel implements ActionListener {
 
-    private static final long serialVersionUID = 2747458994628364853L;
-    private static final int NO_OF_DETECTIVES = 5;
-
-    private BufferedImage flagImage[];
-
+    private static final int CIRCLE_R = 30;
     private Point[] playerPositions = null;
 
     private int currentPlayer = -1;
@@ -28,16 +26,6 @@ public class MapLabel extends JLabel implements ActionListener {
     public MapLabel(ImageIcon imageIcon, int numDetectives) {
         super(imageIcon);
         playerPositions = new Point[numDetectives + 1];
-        flagImage = new BufferedImage[NO_OF_DETECTIVES + 1];
-        for (int i = 0; i <= NO_OF_DETECTIVES; i++) {
-            String fileName = "/images/flag" + Integer.toString(i) + ".gif";
-            try {
-                flagImage[i] = ImageIO.read(new File(getClass().getResource(fileName).getPath()));
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, String.format("Error opening file %s. Exiting!", fileName), "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-        }
     }
 
     public void paint(Graphics g) {
@@ -50,14 +38,19 @@ public class MapLabel extends JLabel implements ActionListener {
                 if (playerPositions[i] != null && !(blinkOn && i == currentPlayer)
                         && !(i == 0 && !mrXVisible)) {
 
-                    Point playerPos = this.getPlayerPos(i);
+                    Point playerPos = getPlayerPos(i);
 
-                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-                    g2.drawImage(flagImage[i], playerPos.x, playerPos.y - flagImage[i].getHeight(),
-                            null);
+                    drawCenteredCircle(g2,playerPos.x,playerPos.y,CIRCLE_R, Seeker.colors[i]);
                 }
             }
         }
+    }
+    public void drawCenteredCircle(Graphics2D g, int x, int y, int r, Color color) {
+        x = x-(r/2);
+        y = y-(r/2);
+        g.setStroke(new BasicStroke(10));
+        g.setColor(color);
+        g.drawOval(x,y,r,r);
     }
 
     public void setPlayerPos(int player, int x, int y) {
@@ -108,9 +101,7 @@ public class MapLabel extends JLabel implements ActionListener {
         Point playerPos = getPlayerPos(player);
 
         if (player != -1 && playerPos != null) {
-            int width = flagImage[player].getWidth();
-            int height = flagImage[player].getHeight();
-            this.repaint(playerPos.x, playerPos.y - height, width, height);
+            this.repaint(playerPos.x - CIRCLE_R, playerPos.y - CIRCLE_R , CIRCLE_R * 2, CIRCLE_R * 2);
         }
     }
 

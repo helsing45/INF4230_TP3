@@ -1,5 +1,6 @@
 package main.java.players;
 
+import javafx.scene.paint.Color;
 import main.java.model.Action;
 import main.java.model.State;
 import main.java.strategies.Playouts;
@@ -8,6 +9,15 @@ import java.io.Serializable;
 
 public abstract class Player implements Serializable {
 
+
+    public static java.awt.Color[] colors = new java.awt.Color[]{
+            java.awt.Color.MAGENTA,
+            java.awt.Color.BLACK,
+            java.awt.Color.BLUE,
+            java.awt.Color.YELLOW,
+            java.awt.Color.RED,
+            java.awt.Color.GREEN
+    };
     public enum Operator {
         HUMAN, COMPUTER
     }

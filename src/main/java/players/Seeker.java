@@ -5,6 +5,8 @@ import main.java.model.State;
 import main.java.strategies.CoalitionReduction;
 import main.java.strategies.Playouts;
 
+import java.awt.*;
+
 public class Seeker extends Player {
 
     private static final int TAXI_TICKETS = 10;

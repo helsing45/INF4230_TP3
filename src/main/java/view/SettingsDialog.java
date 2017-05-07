@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class SettingsDialog extends JDialog {
-    private static final int DEFAULT_SEEKER_COUNT = 4, DEFAULT_ITERATION_COUNT = 50;
+    private static final int DEFAULT_SEEKER_COUNT = 4, DEFAULT_ITERATION_COUNT = 5;
 
     private JPanel contentPane;
     private JButton buttonOK;
