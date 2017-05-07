@@ -97,7 +97,7 @@ public class SettingsDialog extends JDialog {
 
         public Setting() {
             isCriminalHuman = false;
-            isDetectiveHuman = false;
+            isDetectiveHuman = true;
             debugMode = false;
             detectiveCount = DEFAULT_SEEKER_COUNT;
             iterationCount = DEFAULT_ITERATION_COUNT;

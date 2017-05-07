@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 
 public class ScotlandYard extends JApplet implements ListSelectionListener, SettingsDialog.Listener {
@@ -304,38 +305,36 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         }*/
     }
 
-    private Action getNextAction(State state, SearchTree mcts) {
+    private Action getNextAction(State state, SearchTree searchTree) {
         Action mostPromisingAction;
-        if (state.currentPlayerIsHuman())
+        if (state.currentPlayerIsHuman()) {
+            done.setEnabled(true);
             mostPromisingAction = getActionFromInput(state);
+        }
         else
-            mostPromisingAction = getActionFromSearchTree(state, mcts);
+            mostPromisingAction = getActionFromSearchTree(state, searchTree);
         return mostPromisingAction;
     }
 
     private synchronized Action getActionFromInput(State state) {
         done.setEnabled(true);
         parentFrame.setVisible(true);
-        for (Action action : state.getAvailableActionsForCurrentAgent()) {
-            cboAvailableMoves.addItem(action.toString());
-        }
-        cboAvailableMoves.setVisible(true);
-        cboAvailableMoves.setEnabled(true);
+        return getInputDialog(state);
+    }
+    public Action getInputDialog(State state){
 
-        cboAvailableMoves.repaint();
-        repaint();
-        parentFrame.setVisible(true);
-
-        cboAvailableMoves.setVisible(true);
-        synchronized (this){
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        int actionIndex = 1; // TODO get real input
-        return state.getAvailableActionsForCurrentAgent().get(actionIndex);
+        ArrayList<Action> availableMoves = new ArrayList<>(state.getAvailableActionsForCurrentAgent());
+        Action[] options = availableMoves.toArray(new Action[availableMoves.size()]);
+        int index =  JOptionPane.showOptionDialog(null,
+                state.getPlayersOnBoard().getPlayer(state.getCurrentPlayerIndex()) + " où va-t-il ?",
+                "Jouer votre tour",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,//do not use a custom Icon
+                options,//the titles of buttons
+                options[0]);
+        boolean b = true;
+        return options[index];
     }
 
     private Action getActionFromSearchTree(State state, SearchTree mcts) {

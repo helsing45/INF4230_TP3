@@ -62,10 +62,6 @@ public class PlayersOnBoard implements Serializable {
                 .skip(SKIP_CRIMINAL).boxed().collect(Collectors.toList());
     }
 
-    private PlayersOnBoard(BoardGame board, Player[] players, int[] playersPositions, List<Integer> criminalsPossiblePositions, int criminalsMostProbablePosition) {
-
-    }
-
     public double criminalsAverageDistanceToDetectives(Player.Role role) {
         int criminalsPosition = playersActualPositions[CRIMINAL_INDEX];
         return Arrays.stream(playersActualPositions)
@@ -98,6 +94,9 @@ public class PlayersOnBoard implements Serializable {
         return players[playerIndex];
     }
 
+    public String getPlayer(int playerIndex){
+        return players[playerIndex].toString();
+    }
 
     public String getPlayerInfo(int playerIndex, boolean revealAll){
         String string =  players[playerIndex] + " sur ";
