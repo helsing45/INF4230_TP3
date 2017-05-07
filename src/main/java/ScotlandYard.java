@@ -25,10 +25,8 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
     boolean gameStarted;
     JFrame parentFrame;
     Container container;
-    JButton done, start;
-    JTextField txtInfo;
+    JButton  start;
     MapLabel map;
-    JComboBox cboAvailableMoves;
     JTextArea messageArea;
     SettingsDialog settingsDialog;
 
@@ -98,45 +96,6 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         startC.gridy = 1;
         startC.insets = new Insets(0, 5, 5, 5);
         container.add(start, startC);
-
-        done = new JButton("Jouer");
-        done.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                manualPlay();
-            }
-        });
-        if (!gameStarted)
-            done.setEnabled(false);
-        GridBagConstraints doneC = new GridBagConstraints();
-        doneC.gridx = 6;
-        doneC.gridy = 1;
-        doneC.insets = new Insets(0, 5, 5, 5);
-        doneC.fill = GridBagConstraints.HORIZONTAL; // fill the remaining space
-        // at the end of row
-        doneC.anchor = GridBagConstraints.EAST;
-        container.add(done, doneC);
-
-        txtInfo = new JTextField(50);
-        GridBagConstraints msgC = new GridBagConstraints();
-        msgC.gridx = 3;
-        msgC.gridy = 1;
-        msgC.ipadx = 150; // make this one a little longer
-        msgC.insets = new Insets(0, 5, 5, 5);
-        container.add(txtInfo, msgC);
-        txtInfo.setEditable(false);
-        txtInfo.setText("Appuyer sur commencer");
-
-        GridBagConstraints getMoveC = new GridBagConstraints();
-        getMoveC.gridx = 5;
-        getMoveC.gridy = 1;
-        getMoveC.insets = new Insets(0, 5, 5, 5);
-
-        cboAvailableMoves = new JComboBox();
-        cboAvailableMoves.setSize(new Dimension(120, 30));
-        container.add(cboAvailableMoves, getMoveC);
-
-
         parentFrame.setVisible(true);
         addMenu();
     }
@@ -185,20 +144,11 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
 
     private void reset() {
         start.setEnabled(true);
-        container.remove(cboAvailableMoves);
-        done.setEnabled(false);
-        done.setVisible(false);
         map.setCurrentPlayer(-1);
-        cboAvailableMoves.repaint();
         parentFrame.setVisible(true);
-        done.repaint();
-        txtInfo.setText("Appuyer sur commencer");
+        messageArea.setText("");
         repaint();
         gameStarted = false;
-    }
-
-    private void manualPlay() {
-        //TODO do something usefull
     }
 
     private void startGame() {
@@ -246,9 +196,9 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         map.setCurrentPlayer(state.getCurrentPlayerIndex());
         if (currentPlayerCanMove(state)) {
             main.java.model.Action mostPromisingAction = getNextAction(state, searchTree);
+            printMove(state);
             state.performActionForCurrentAgent(mostPromisingAction);
             map.setPlayerPos(state.getCurrentPlayerIndex(), state.getPlayersOnBoard().getLocationOf(state.getCurrentPlayerIndex()));
-            printMove(state);
         } else {
             state.skipCurrentAgent();
             message(state.getCurrentAgent() + " n'a pas bouger");
@@ -308,21 +258,14 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
     private Action getNextAction(State state, SearchTree searchTree) {
         Action mostPromisingAction;
         if (state.currentPlayerIsHuman()) {
-            done.setEnabled(true);
-            mostPromisingAction = getActionFromInput(state);
+            mostPromisingAction = getInputDialog(state);
         }
         else
             mostPromisingAction = getActionFromSearchTree(state, searchTree);
         return mostPromisingAction;
     }
 
-    private synchronized Action getActionFromInput(State state) {
-        done.setEnabled(true);
-        parentFrame.setVisible(true);
-        return getInputDialog(state);
-    }
-    public Action getInputDialog(State state){
-
+    private Action getInputDialog(State state){
         ArrayList<Action> availableMoves = new ArrayList<>(state.getAvailableActionsForCurrentAgent());
         Action[] options = availableMoves.toArray(new Action[availableMoves.size()]);
         int index =  JOptionPane.showOptionDialog(null,
@@ -333,7 +276,6 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
                 null,//do not use a custom Icon
                 options,//the titles of buttons
                 options[0]);
-        boolean b = true;
         return options[index];
     }
 
