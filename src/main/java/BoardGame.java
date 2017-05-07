@@ -7,8 +7,6 @@ import main.java.players.Hider;
 import main.java.players.Player;
 import main.java.players.Seeker;
 import main.java.search.SearchTree;
-import main.java.strategies.CoalitionReduction;
-import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 import main.java.view.MapLabel;
 import main.java.view.SettingsDialog;
@@ -20,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Collections;
 
 import static main.java.players.Player.Operator.COMPUTER;
 import static main.java.players.Player.Operator.HUMAN;
@@ -33,7 +30,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     boolean gameStarted;
     JFrame parentFrame;
     Container container;
-    JButton done, start, btnDetectives;
+    JButton done, start;
     JTextField txtInfo, detectiveStatus;
     MapLabel map;
     JComboBox cboAvailableMoves;
@@ -46,25 +43,21 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         JFrame f = new JFrame("Scotland yard");
         BoardGame game = new BoardGame();
         game.buildUI(f);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 System.exit(0);
             }
         });
-        f.setSize(new Dimension(1057, 942));
-
-        f.setLocation(dim.width / 2 - f.getSize().width / 2, dim.height / 2 - f.getSize().height / 2);
+        f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        f.setUndecorated(true);
         f.setVisible(true);
-        f.setResizable(true);
+        f.setResizable(false);
     }
 
     void buildUI(JFrame f) {
         parentFrame = f;
         container = parentFrame.getContentPane();
         container.setLayout(new GridBagLayout());
-        int v = ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-        int h = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED;
 
         GridBagConstraints messageConstraints = new GridBagConstraints();
         messageConstraints.fill = GridBagConstraints.BOTH;
@@ -85,7 +78,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         mapConstraints.fill = GridBagConstraints.BOTH;
 
 
-        JScrollPane map = new JScrollPane(this.map = new MapLabel(new ImageIcon(getClass().getResource("/images/map.jpg")), PlayersOnBoard.NUMBER_OF_PLAYERS), v, h);
+        JScrollPane map = new JScrollPane(this.map = new MapLabel(new ImageIcon(getClass().getResource("/images/map.jpg")), PlayersOnBoard.NUMBER_OF_PLAYERS), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         mapConstraints.gridx = 0;
         mapConstraints.gridy = 0;
         mapConstraints.gridwidth = 7;
@@ -95,23 +88,6 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         mapConstraints.weighty = 1.0;
         mapConstraints.insets = new Insets(10, 10, 10, 10);
         container.add(map, mapConstraints);
-
-        btnDetectives = new JButton("DetectivesButton");
-        btnDetectives.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showDetectivesStats();
-            }
-        });
-        btnDetectives.setActionCommand("detectives");
-        btnDetectives.setVisible(true);
-        btnDetectives.setEnabled(gameStarted);
-
-        GridBagConstraints detectivesBtnConstraints = new GridBagConstraints();
-        detectivesBtnConstraints.gridx = 0;
-        detectivesBtnConstraints.gridy = 1;
-        detectivesBtnConstraints.insets = new Insets(0, 10, 5, 5);
-        container.add(btnDetectives, detectivesBtnConstraints);
 
         start = new JButton("Start Game Button");
         start.addActionListener(new AbstractAction() {
@@ -128,7 +104,7 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         startC.insets = new Insets(0, 5, 5, 5);
         container.add(start, startC);
 
-        done = new JButton("Play Button");
+        done = new JButton("Jouer");
         done.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -156,18 +132,15 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         txtInfo.setEditable(false);
         txtInfo.setText("Appuyer sur commencer");
 
-        detectiveStatus = new JTextField(120);
-        detectiveStatus.setEditable(false);
-        GridBagConstraints detectiveStatusC = new GridBagConstraints();
-        detectiveStatusC.gridx = 4;
-        detectiveStatusC.gridy = 1;
-        detectiveStatusC.ipadx = 320;
-        detectiveStatusC.insets = new Insets(0, 5, 5, 5);
-
         GridBagConstraints getMoveC = new GridBagConstraints();
         getMoveC.gridx = 5;
         getMoveC.gridy = 1;
         getMoveC.insets = new Insets(0, 5, 5, 5);
+
+        cboAvailableMoves = new JComboBox();
+        cboAvailableMoves.setSize(new Dimension(120, 30));
+        container.add(cboAvailableMoves, getMoveC);
+
 
         parentFrame.setVisible(true);
         addMenu();
@@ -216,12 +189,10 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     }
 
     private void reset() {
-        btnDetectives.setEnabled(false);
         start.setEnabled(true);
         container.remove(cboAvailableMoves);
         done.setEnabled(false);
         done.setVisible(false);
-        detectiveStatus.setVisible(false);
         map.setCurrentPlayer(-1);
         cboAvailableMoves.repaint();
         parentFrame.setVisible(true);
@@ -235,16 +206,13 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         //TODO do something usefull
     }
 
-    private void showDetectivesStats() {
-    }
-
     private void startGame() {
         playGame(initializeSearch(), true);
     }
 
     private void playGame(SearchTree searchTree, boolean showWinner) {
         if (setting == null) setting = new SettingsDialog.Setting();
-
+        messageArea.setText("");
         Player[] players = initializePlayersWithOperator(setting.isCriminalIsComputer() ? COMPUTER : HUMAN,
                 setting.isDetectiveIsComputer() ? COMPUTER : HUMAN);
         State state = State.initialize(players);
@@ -265,10 +233,10 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
 
     private Player[] initializePlayersWithOperator(Player.Operator hider, Player.Operator seeker) {
         Player[] players = new Player[setting.getDetectiveCount() + 1];
-        players[0] = new Hider(hider, Playouts.Uses.BASIC, CoalitionReduction.Uses.YES, MoveFiltering.Uses.YES);
+        players[0] = new Hider(hider, Playouts.Uses.GREEDY, true, true);
         for (int i = 1; i < players.length; i++)
-            players[i] = new Seeker(seeker, Seeker.Color.values()[i - 1], Playouts.Uses.BASIC,
-                    CoalitionReduction.Uses.YES, MoveFiltering.Uses.YES);
+            players[i] = new Seeker(seeker, Seeker.Color.values()[i - 1], Playouts.Uses.GREEDY,
+                    true, true);
         return players;
     }
 
@@ -332,22 +300,36 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
         if (state.currentPlayerIsHuman())
             mostPromisingAction = getActionFromInput(state);
         else
-            mostPromisingAction = getActionFromSearch(state, mcts);
+            mostPromisingAction = getActionFromSearchTree(state, mcts);
         return mostPromisingAction;
     }
 
-    private Action getActionFromInput(State state) {
+    private synchronized Action getActionFromInput(State state) {
+        done.setEnabled(true);
+        parentFrame.setVisible(true);
+        for (Action action : state.getAvailableActionsForCurrentAgent()) {
+            cboAvailableMoves.addItem(action.toString());
+        }
+        cboAvailableMoves.setVisible(true);
+        cboAvailableMoves.setEnabled(true);
+
+        cboAvailableMoves.repaint();
+        repaint();
+        parentFrame.setVisible(true);
+
+        cboAvailableMoves.setVisible(true);
+        synchronized (this){
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         int actionIndex = 1; // TODO get real input
         return state.getAvailableActionsForCurrentAgent().get(actionIndex);
     }
 
-    private Action getRandomAction(State state) {
-        java.util.List<Action> actions = state.getAvailableActionsForCurrentAgent();
-        Collections.shuffle(actions);
-        return actions.get(0);
-    }
-
-    private Action getActionFromMctsSearch(State state, SearchTree mcts) {
+    private Action getActionFromSearchTree(State state, SearchTree mcts) {
         Action mostPromisingAction;
         state.setSearchModeOn();
         updateHidersMostProbablePosition(state);
@@ -367,13 +349,6 @@ public class BoardGame extends JApplet implements ListSelectionListener, Setting
     private void updateHidersMostProbablePosition(State state) {
         if (state.isTerminal())
             state.updateHidersProbablePosition();
-    }
-
-    private Action getActionFromSearch(State state, SearchTree mcts) {
-        if (state.currentPlayerIsRandom())
-            return getRandomAction(state);
-        else
-            return getActionFromMctsSearch(state, mcts);
     }
 
     private boolean currentPlayerCanMove(State state) {

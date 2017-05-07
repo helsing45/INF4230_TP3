@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Action implements Serializable{
 
     public enum Transportation {
-        TAXI, BUS, UNDERGROUND, BLACK_FARE
+        TAXI, BUS, METRO, PASSE_DROIT
     }
 
     private final Transportation transportation;
@@ -28,8 +28,8 @@ public class Action implements Serializable{
         return this.transportation == transportation;
     }
 
-    protected Action generateBlackFareAction() {
-        return new Action(Transportation.BLACK_FARE, this.destination);
+    protected Action generatePasseDroitAction() {
+        return new Action(Transportation.PASSE_DROIT, this.destination);
     }
 
     @Override

@@ -5,10 +5,6 @@ import main.java.players.Seeker;
 
 public class CoalitionReduction {
 
-    public enum Uses {
-        YES, NO
-    }
-
     private static final double COALITION_REDUCTION_PARAMETER = 0.25;
 
     public static double getCoalitionReductionRewardFromTerminalState(State state, Seeker seeker) {

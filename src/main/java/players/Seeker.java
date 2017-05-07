@@ -3,7 +3,6 @@ package main.java.players;
 import main.java.model.Action;
 import main.java.model.State;
 import main.java.strategies.CoalitionReduction;
-import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 
 public class Seeker extends Player {
@@ -11,18 +10,15 @@ public class Seeker extends Player {
     private static final int TAXI_TICKETS = 10;
     private static final int BUS_TICKETS = 8;
     private static final int UNDERGROUND_TICKETS = 4;
-    private static final double COALITION_REDUCTION_PARAMETER = 0.25;
 
     public enum Color {
-        BLACK, BLUE, YELLOW, RED, GREEN
+        NOIRE, BLEU, JAUNE, ROUGE, VERT
     }
 
     private final Color color;
 
-    public Seeker(Operator operator, Color color, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
-                  MoveFiltering.Uses moveFiltering) {
-        super(operator, Type.SEEKER, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, playout,
-                coalitionReduction, moveFiltering);
+    public Seeker(Operator operator, Color color, Playouts.Uses playout, boolean canUseCoalitionReduction, boolean useMoveFiltering) {
+        super(operator, Type.SEEKER, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS, playout, canUseCoalitionReduction, useMoveFiltering);
         this.color = color;
     }
 
@@ -65,6 +61,6 @@ public class Seeker extends Player {
 
     @Override
     public String toString() {
-        return color + " Seeker";
+        return "Détective " + color;
     }
 }

@@ -86,10 +86,6 @@ public class PlayersOnBoard implements Serializable {
         return getPlayerAtIndex(playerIndex).isHuman();
     }
 
-    protected boolean playerIsRandom(int playerIndex) {
-        return getPlayerAtIndex(playerIndex).isRandom();
-    }
-
     protected boolean playerUsesCoalitionReduction(int playerIndex) {
         return getPlayerAtIndex(playerIndex).usesCoalitionReduction();
     }
@@ -108,7 +104,7 @@ public class PlayersOnBoard implements Serializable {
         string += playerIndex != HIDERS_INDEX || revealAll ? playersActualPositions[playerIndex] :"inconnu";
          string += " (taxi : " + players[playerIndex].getTaxiTickets() +
                 ", bus : " + players[playerIndex].getBusTickets() +
-                ", underground : " + players[playerIndex].getUndergroundTickets() + ") ";
+                ", metro : " + players[playerIndex].getMetroTickets() + ") ";
          return string;
     }
 
@@ -165,7 +161,7 @@ public class PlayersOnBoard implements Serializable {
         availableActions = removeActionsWithOccupiedDestinations(availableActions);
         availableActions = removeActionsBecauseOfNoPlayersTickets(availableActions, playerIndex);
         if (!playerIsHider(playerIndex))
-            availableActions = removeTransportationActions(Action.Transportation.BLACK_FARE, availableActions);
+            availableActions = removeTransportationActions(Action.Transportation.PASSE_DROIT, availableActions);
         else
             availableActions = fixHidersBlackFareActions((Hider) players[playerIndex], availableActions);
         return availableActions;
@@ -190,13 +186,13 @@ public class PlayersOnBoard implements Serializable {
         if (!player.hasBusTickets())
             actions = removeTransportationActions(Action.Transportation.BUS, actions);
         if (!player.hasUndergroundTickets())
-            actions = removeTransportationActions(Action.Transportation.UNDERGROUND, actions);
+            actions = removeTransportationActions(Action.Transportation.METRO, actions);
         return actions;
     }
 
     private List<Action> fixHidersBlackFareActions(Hider hider, List<Action> actions) {
         if (!hider.hasBlackFareTicket())
-            actions = removeTransportationActions(Action.Transportation.BLACK_FARE, actions);
+            actions = removeTransportationActions(Action.Transportation.PASSE_DROIT, actions);
         return actions;
     }
 
@@ -220,7 +216,7 @@ public class PlayersOnBoard implements Serializable {
     }
 
     private void removeTransportationCard(int playerIndex, Action action) {
-        if (playerIsHider(playerIndex) && action.isTransportationAction(Action.Transportation.BLACK_FARE)) {
+        if (playerIsHider(playerIndex) && action.isTransportationAction(Action.Transportation.PASSE_DROIT)) {
             Hider hider = (Hider)getPlayerAtIndex(HIDERS_INDEX);
             hider.removeBlackFareTicket();
         }
@@ -258,7 +254,7 @@ public class PlayersOnBoard implements Serializable {
     private List<Integer> recalculateHidersPossiblePositions(Action.Transportation transportation) {
         List<Integer> newHidersPossiblePositions = new ArrayList<>();
         for (int position : hidersPossiblePositions) {
-            if (transportation == Action.Transportation.BLACK_FARE)
+            if (transportation == Action.Transportation.PASSE_DROIT)
                 newHidersPossiblePositions.addAll(board.getDestinationsForPosition(position));
             else {
                 newHidersPossiblePositions.addAll(

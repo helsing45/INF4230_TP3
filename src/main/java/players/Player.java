@@ -2,8 +2,6 @@ package main.java.players;
 
 import main.java.model.Action;
 import main.java.model.State;
-import main.java.strategies.CoalitionReduction;
-import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 
 import java.io.Serializable;
@@ -11,7 +9,7 @@ import java.io.Serializable;
 public abstract class Player implements Serializable {
 
     public enum Operator {
-        HUMAN, COMPUTER, RANDOM
+        HUMAN, COMPUTER
     }
 
     public enum Type {
@@ -22,22 +20,19 @@ public abstract class Player implements Serializable {
     private final Type type;
     private int taxiTickets;
     private int busTickets;
-    private int undergroundTickets;
+    private int metroTickets;
     private final Playouts.Uses playout;
-    private final CoalitionReduction.Uses coalitionReduction;
-    private final MoveFiltering.Uses moveFiltering;
+    private final boolean useCoalitionReduction, useMoveFiltering;
 
-    protected Player(Operator operator, Type type, int taxiTickets, int busTickets, int undergroundTickets,
-                     Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
-                     MoveFiltering.Uses moveFiltering) {
+    protected Player(Operator operator, Type type, int taxiTickets, int busTickets, int metroTickets, Playouts.Uses playout, boolean useCoalitionReduction, boolean useMoveFiltering) {
         this.operator = operator;
         this.type = type;
         this.taxiTickets = taxiTickets;
         this.busTickets = busTickets;
-        this.undergroundTickets = undergroundTickets;
+        this.metroTickets = metroTickets;
         this.playout = playout;
-        this.coalitionReduction = coalitionReduction;
-        this.moveFiltering = moveFiltering;
+        this.useCoalitionReduction = useCoalitionReduction;
+        this.useMoveFiltering = useMoveFiltering;
     }
 
     public int getTaxiTickets() {
@@ -48,8 +43,8 @@ public abstract class Player implements Serializable {
         return busTickets;
     }
 
-    public int getUndergroundTickets() {
-        return undergroundTickets;
+    public int getMetroTickets() {
+        return metroTickets;
     }
 
     public boolean isHider() {
@@ -64,10 +59,6 @@ public abstract class Player implements Serializable {
         return operator == Operator.HUMAN;
     }
 
-    public boolean isRandom() {
-        return operator == Operator.RANDOM;
-    }
-
     public boolean hasTaxiTickets() {
         return taxiTickets > 0;
     }
@@ -77,7 +68,7 @@ public abstract class Player implements Serializable {
     }
 
     public boolean hasUndergroundTickets() {
-        return undergroundTickets > 0;
+        return metroTickets > 0;
     }
 
     public void removeTicket(Action.Transportation transportation) {
@@ -88,8 +79,8 @@ public abstract class Player implements Serializable {
             case BUS:
                 busTickets--;
                 break;
-            case UNDERGROUND:
-                undergroundTickets--;
+            case METRO:
+                metroTickets--;
         }
     }
 
@@ -101,8 +92,8 @@ public abstract class Player implements Serializable {
             case BUS:
                 busTickets++;
                 break;
-            case UNDERGROUND:
-                undergroundTickets++;
+            case METRO:
+                metroTickets++;
         }
     }
 
@@ -111,38 +102,22 @@ public abstract class Player implements Serializable {
             Action action = getActionForCurrentPlayerType(state);
             if (action != null) {
                 state.performActionForCurrentAgent(action);
-            }
-            else
+            } else
                 state.skipCurrentAgent();
         }
         return state;
     }
 
-    public boolean usesBiasedPlayout () {
-        switch (playout) {
-            case BASIC:
-                return false;
-            default:
-                return true;
-        }
+    boolean usesBiasedPlayout() {
+        return playout == Playouts.Uses.GREEDY;
     }
 
     public boolean usesCoalitionReduction() {
-        switch (coalitionReduction) {
-            case YES:
-                return true;
-            default:
-                return false;
-        }
+        return useCoalitionReduction;
     }
 
     public boolean usesMoveFiltering() {
-        switch (moveFiltering) {
-            case YES:
-                return true;
-            default:
-                return false;
-        }
+        return useMoveFiltering;
     }
 
     private Action getActionForCurrentPlayerType(State state) {

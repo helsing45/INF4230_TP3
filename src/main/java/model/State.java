@@ -87,10 +87,6 @@ public class State implements Serializable{
         return playersOnBoard.playerIsHuman(currentPlayerIndex);
     }
 
-    public boolean currentPlayerIsRandom() {
-        return playersOnBoard.playerIsRandom(currentPlayerIndex);
-    }
-
     public boolean previousPlayerIsHuman() {
         return playersOnBoard.playerIsHuman(previousPlayerIndex);
     }
@@ -102,10 +98,9 @@ public class State implements Serializable{
     public String printNewRound() {
         String string = null;
         if (currentPlayerIsHider()) {
-            string = "ROUND: " + currentRound;
-            if (isHiderSurfacesRound())
-                string += ("\n HIDER SURFACES!");
-            string += ("\n ----------");
+            string = ("\n ----------------------------\n");
+            string += "         ROUND: " + currentRound;
+            string += ("\n ----------------------------\n");
         }
         return string;
     }
@@ -248,7 +243,7 @@ public class State implements Serializable{
 
     private List<Action> generateBlackfareActions(List<Action> actions) {
         return actions.stream()
-                .map(Action::generateBlackFareAction).collect(Collectors.toList());
+                .map(Action::generatePasseDroitAction).collect(Collectors.toList());
     }
 
     private List<Action> removeDuplicates(List<Action> actions) {

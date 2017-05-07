@@ -3,7 +3,6 @@ package main.java.players;
 import main.java.model.Action;
 import main.java.model.PlayersOnBoard;
 import main.java.model.State;
-import main.java.strategies.CoalitionReduction;
 import main.java.strategies.MoveFiltering;
 import main.java.strategies.Playouts;
 
@@ -13,15 +12,13 @@ public class Hider extends Player {
 
     private static final int TAXI_TICKETS = 4;
     private static final int BUS_TICKETS = 3;
-    private static final int UNDERGROUND_TICKETS = 3;
+    private static final int METRO_TICKETS = 3;
 
     private int doubleMoveCards;
     private int blackFareTickets;
 
-    public Hider(Operator operator, Playouts.Uses playout, CoalitionReduction.Uses coalitionReduction,
-                 MoveFiltering.Uses moveFiltering) {
-        super(operator, Type.HIDER, TAXI_TICKETS, BUS_TICKETS, UNDERGROUND_TICKETS,
-                playout, coalitionReduction, moveFiltering);
+    public Hider(Operator operator, Playouts.Uses playout, boolean canUseCoalitionReduction, boolean useMoveFiltering) {
+        super(operator, Type.HIDER, TAXI_TICKETS, BUS_TICKETS, METRO_TICKETS, playout, canUseCoalitionReduction, useMoveFiltering);
         this.doubleMoveCards = 2;
         this.blackFareTickets = 5;
     }
@@ -89,6 +86,6 @@ public class Hider extends Player {
 
     @Override
     public String toString() {
-        return "Hider";
+        return "Criminel";
     }
 }
