@@ -1,6 +1,5 @@
 package main.java.utilities;
 
-import main.java.model.Action;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -17,7 +16,6 @@ public class BoardPositionFileParser extends DefaultHandler {
 
     private final String fileName;
     private List<Point> boardPositions;
-    private Action.Transportation temporaryTransportation;
     private int temporaryX,temporaryY;
     private boolean isXLocation;
     private boolean isYLocation;

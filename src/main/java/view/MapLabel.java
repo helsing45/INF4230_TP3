@@ -17,7 +17,6 @@ public class MapLabel extends JLabel implements ActionListener {
     public boolean mrXVisible = false; /* Is Mr. X' Position revealed? */
 
     Timer blinkTimer = new Timer(1000, this);
-    private int[] playerPos;
 
     public MapLabel(ImageIcon imageIcon, int numDetectives) {
         super(imageIcon);
@@ -36,7 +35,7 @@ public class MapLabel extends JLabel implements ActionListener {
 
                     Point playerPos = getPlayerPos(i);
 
-                    drawCenteredCircle(g2,playerPos.x,playerPos.y,CIRCLE_R, Detective.colors[i]);
+                    drawCenteredCircle(g2, playerPos.x, playerPos.y, CIRCLE_R, Detective.colors[i]);
                 }
             }
         }
@@ -47,16 +46,16 @@ public class MapLabel extends JLabel implements ActionListener {
     }
 
     public void drawCenteredCircle(Graphics2D g, int x, int y, int r, Color color) {
-        x = x-(r/2);
-        y = y-(r/2);
+        x = x - (r / 2);
+        y = y - (r / 2);
         g.setStroke(new BasicStroke(10));
         g.setColor(color);
-        g.drawOval(x,y,r,r);
+        g.drawOval(x, y, r, r);
     }
 
     public void setPlayerPos(int player, int x, int y) {
         this.playerPositions[player] = new Point(x, y);
-        this.repaintPlayerPos(player);
+        repaint();
     }
 
     public void setPlayerPos(int player, Point pos) {
@@ -79,7 +78,7 @@ public class MapLabel extends JLabel implements ActionListener {
     public void setCurrentPlayer(int player) {
         if (player != currentPlayer) {
             /*
-			 * Stop the blink timer and repaint the current player's position if
+             * Stop the blink timer and repaint the current player's position if
 			 * it was currently not visible due to blinking.
 			 */
             if (blinkTimer.isRunning()) {
@@ -102,7 +101,7 @@ public class MapLabel extends JLabel implements ActionListener {
         Point playerPos = getPlayerPos(player);
 
         if (player != -1 && playerPos != null) {
-            this.repaint(playerPos.x - CIRCLE_R, playerPos.y - CIRCLE_R , CIRCLE_R * 2, CIRCLE_R * 2);
+            this.repaint(playerPos.x - CIRCLE_R, playerPos.y - CIRCLE_R, CIRCLE_R * 2, CIRCLE_R * 2);
         }
     }
 
@@ -115,9 +114,5 @@ public class MapLabel extends JLabel implements ActionListener {
                 this.repaintPlayerPos(currentPlayer);
             }
         }
-    }
-
-    public void setPlayerPos(int[] playerPos) {
-        this.playerPos = playerPos;
     }
 }

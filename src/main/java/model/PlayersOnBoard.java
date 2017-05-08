@@ -124,17 +124,17 @@ public class PlayersOnBoard implements Serializable {
         return false;
     }
 
-    protected boolean seekerOnCriminalsMostProbablePosition(Detective detective) {
-        return seekerOnPosition(detective, criminalsMostProbablePositionPreviousRound);
+    protected boolean detectiveOnCriminalsMostProbablePosition(Detective detective) {
+        return detectiveOnPosition(detective, criminalsMostProbablePositionPreviousRound);
     }
 
-    protected boolean seekerOnCriminalsActualPosition(Detective detective) {
-        return seekerOnPosition(detective, playersActualPositions[CRIMINAL_INDEX]);
+    protected boolean detectiveOnCriminalsActualPosition(Detective detective) {
+        return detectiveOnPosition(detective, playersActualPositions[CRIMINAL_INDEX]);
     }
 
-    protected boolean seekerOnPosition(Detective detective, int position) {
-        int seekerIndex = IntStream.range(1, players.length).filter(i -> players[i].equals(detective)).findFirst().getAsInt();
-        return playersActualPositions[seekerIndex] == position;
+    protected boolean detectiveOnPosition(Detective detective, int position) {
+        int detectiveIndex = IntStream.range(1, players.length).filter(i -> players[i].equals(detective)).findFirst().getAsInt();
+        return playersActualPositions[detectiveIndex] == position;
     }
 
     protected List<Action> getAvailableActionsFromDetectivesPov(int playerIndex) {

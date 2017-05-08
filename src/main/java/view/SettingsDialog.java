@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class SettingsDialog extends JDialog {
-    private static final int DEFAULT_SEEKER_COUNT = 4, DEFAULT_ITERATION_COUNT = 5;
+    private static final int DEFAULT_DETECTIVE_COUNT = 4, DEFAULT_ITERATION_COUNT = 5;
 
     private JPanel contentPane;
     private JButton buttonOK;
@@ -59,7 +59,7 @@ public class SettingsDialog extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        detectiveCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_SEEKER_COUNT, 1.0, 5.0, 1.0));
+        detectiveCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_DETECTIVE_COUNT, 1.0, 5.0, 1.0));
         iterationCountSpinner.setModel(new SpinnerNumberModel(DEFAULT_ITERATION_COUNT, 1.0, 20000, 1.0));
     }
 
@@ -97,9 +97,9 @@ public class SettingsDialog extends JDialog {
 
         public Setting() {
             isCriminalHuman = false;
-            isDetectiveHuman = true;
+            isDetectiveHuman = false;
             debugMode = false;
-            detectiveCount = DEFAULT_SEEKER_COUNT;
+            detectiveCount = DEFAULT_DETECTIVE_COUNT;
             iterationCount = DEFAULT_ITERATION_COUNT;
         }
 

@@ -82,7 +82,7 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         mapConstraints.insets = new Insets(10, 10, 10, 10);
         container.add(map, mapConstraints);
 
-        start = new JButton("Start Game Button");
+        start = new JButton("Commencer la partie");
         start.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -196,9 +196,9 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         map.setCurrentPlayer(state.getCurrentPlayerIndex());
         if (currentPlayerCanMove(state)) {
             main.java.model.Action mostPromisingAction = getNextAction(state, searchTree);
-            printMove(state);
             state.performActionForCurrentAgent(mostPromisingAction);
-            map.setPlayerPos(state.getCurrentPlayerIndex(), state.getPlayersOnBoard().getLocationOf(state.getCurrentPlayerIndex()));
+            printMove(state.getPreviousAgent(),mostPromisingAction);
+            map.setPlayerPos(state.getPreviousPlayerIndex(), state.getPlayersOnBoard().getLocationOf(state.getPreviousPlayerIndex()));
         } else {
             state.skipCurrentAgent();
             message(state.getCurrentAgent() + " n'a pas bouger");
@@ -225,8 +225,14 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
             message(string);
     }
 
-    private void printMove(State state) {
-        message(state.getPlayersOnBoard().getPlayerInfo(state.getCurrentPlayerIndex(), setting.isDebugMode()));
+    private void printMove(Player player, Action action) {
+        String moveMessage =  player + " sur ";
+        moveMessage += !(player instanceof Criminal) || setting.isDebugMode() ? action.getDestination() :"inconnu";
+        moveMessage += " (taxi : " + player.getTaxiTickets() +
+                ", bus : " + player.getBusTickets() +
+                ", metro : " + player.getMetroTickets() + ") ";
+
+        message(moveMessage);
     }
 
     public void message(String msg) {
@@ -259,24 +265,27 @@ public class ScotlandYard extends JApplet implements ListSelectionListener, Sett
         Action mostPromisingAction;
         if (state.currentPlayerIsHuman()) {
             mostPromisingAction = getInputDialog(state);
-        }
-        else
+        }else {
             mostPromisingAction = getActionFromSearchTree(state, searchTree);
+        }
         return mostPromisingAction;
     }
 
     private Action getInputDialog(State state){
         ArrayList<Action> availableMoves = new ArrayList<>(state.getAvailableActionsForCurrentAgent());
-        Action[] options = availableMoves.toArray(new Action[availableMoves.size()]);
-        int index =  JOptionPane.showOptionDialog(null,
+        Action[] actions = availableMoves.toArray(new Action[availableMoves.size()]);
+        final JComboBox<Action> combo = new JComboBox<>(actions);
+
+        String[] options = { "Jouer" };
+        JOptionPane.showOptionDialog(null, combo,
                 state.getPlayersOnBoard().getPlayer(state.getCurrentPlayerIndex()) + " où va-t-il ?",
-                "Jouer votre tour",
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,//do not use a custom Icon
-                options,//the titles of buttons
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
                 options[0]);
-        return options[index];
+
+        return (Action) combo.getSelectedItem();
     }
 
     private Action getActionFromSearchTree(State state, SearchTree mcts) {

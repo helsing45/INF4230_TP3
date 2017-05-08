@@ -60,6 +60,10 @@ public class State implements Serializable{
         return playersOnBoard.getPlayerAtIndex(previousPlayerIndex);
     }
 
+    public int getPreviousPlayerIndex() {
+        return previousPlayerIndex;
+    }
+
     public void setSearchModeOn() {
         inSearch = true;
         searchInvokingPlayerIsCriminal = playersOnBoard.playerIsCriminal(currentPlayerIndex);
@@ -123,9 +127,9 @@ public class State implements Serializable{
 
     public boolean detectiveWon(Detective detective) {
         if (inSearchFromDetectivesPov())
-            return playersOnBoard.seekerOnCriminalsMostProbablePosition(detective);
+            return playersOnBoard.detectiveOnCriminalsMostProbablePosition(detective);
         else
-            return playersOnBoard.seekerOnCriminalsActualPosition(detective);
+            return playersOnBoard.detectiveOnCriminalsActualPosition(detective);
     }
 
     public State performActionForCurrentAgent(Action action) {

@@ -4,21 +4,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 
-/**
- * Utility for making deep copies (vs. clone()'s shallow copies) of 
- * objects. Objects are first serialized and then deserialized. Error
- * checking is fairly minimal in this implementation. If an object is
- * encountered that cannot be serialized (or that references an object
- * that cannot be serialized) an error is printed to System.err and
- * null is returned. Depending on your specific application, it might
- * make more sense to have copy(...) re-throw the exception.
- */
-public class DeepCopy {
 
-    /**
-     * Returns a copy of the object, or null if the object cannot
-     * be serialized.
-     */
+public class DeepCopy {
     public static <T> T copy(T orig) {
         Object obj = null;
         try {
